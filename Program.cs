@@ -7,13 +7,42 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ManyConsole;
 
-namespace book2read {
+namespace book2read
+{
 	class Program {
+	
 		public static void Main(string[] args) {   
+			string[] _arguments;
 			
+			if (args.Length > 0) {
+				//_arguments = new string[args.Length - 1];
+				//System.Array.Copy(args, 1, _arguments, 0, args.Length - 1);			
+			} else {
+				Console.WriteLine("Не указана команда для выполнения");
+				Console.WriteLine("Нажмите любую клавишу для выхода из программы...");
+				Console.Read();
+				return;
+			}
+			Console.WriteLine("Current command: " + string.Join(" ", args));
+			try {
+				foreach (var command in GetCommands()) {
+					Console.WriteLine(command.Command);
+				}
+				ConsoleCommandDispatcher.DispatchCommand(GetCommands(), args, Console.Out, true);
+				Console.Read();
+			} catch (Exception e) {
+				Console.WriteLine(e.Message);
+				Console.WriteLine("Нажмите любую клавишу для выхода из программы...");
+				Console.Read();
+			}
+		}
+
+		static void SampleCode() {
 			// Compile conditional sample, use WORK / HOME / TEST to mark dev environment
 			#if WORK
 			Console.WriteLine("This is WORK-DEBUG build");
@@ -34,8 +63,9 @@ namespace book2read {
 				System.Threading.Thread.Sleep(100);   
 			}   
 		}
-
-		static void ShowPercentProgress(string message, int currElementIndex, int totalElementCount) {
+		
+		static void ShowPercentProgress(string message, int currElementIndex, int totalElementCount)
+		{
 			if (currElementIndex < 0 || currElementIndex >= totalElementCount) {
 				throw new InvalidOperationException("currElement out of range");
 			}
@@ -44,6 +74,11 @@ namespace book2read {
 			if (currElementIndex == totalElementCount - 1) {
 				Console.WriteLine(Environment.NewLine);
 			}
+		}
+		
+		public static IEnumerable<ConsoleCommand> GetCommands()
+		{
+			return ConsoleCommandDispatcher.FindCommandsInSameAssemblyAs(typeof(Program));
 		}
 	}
 	
