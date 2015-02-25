@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+# SharpDevelop 5.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "book2read", "book2read.csproj", "{CEF685A6-4DE8-4D5E-BE82-C4C5757EC972}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		Work|Any CPU = Work|Any CPU
+		Home|Any CPU = Home|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CEF685A6-4DE8-4D5E-BE82-C4C5757EC972}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEF685A6-4DE8-4D5E-BE82-C4C5757EC972}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEF685A6-4DE8-4D5E-BE82-C4C5757EC972}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEF685A6-4DE8-4D5E-BE82-C4C5757EC972}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEF685A6-4DE8-4D5E-BE82-C4C5757EC972}.Work|Any CPU.ActiveCfg = Work|Any CPU
+		{CEF685A6-4DE8-4D5E-BE82-C4C5757EC972}.Work|Any CPU.Build.0 = Work|Any CPU
+		{CEF685A6-4DE8-4D5E-BE82-C4C5757EC972}.Home|Any CPU.ActiveCfg = Home|Any CPU
+		{CEF685A6-4DE8-4D5E-BE82-C4C5757EC972}.Home|Any CPU.Build.0 = Home|Any CPU
+	EndGlobalSection
+EndGlobal
