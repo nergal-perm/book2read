@@ -7,17 +7,23 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ManyConsole;
+using book2read.Utilities;
 
 namespace book2read
 {
 	class Program {
-	
+
+		
 		public static void Main(string[] args) {   
-			string[] _arguments;
+			
+			// Инициализировать приложение, показать пользователю общую информацию
+			initAndWelcome();
+			// Ожидать ввода команды пользователем, отрабатывать их исполнение
+			
+			// После получения команды exit организовать выход из консоли
+			
 			
 			if (args.Length > 0) {
 				//_arguments = new string[args.Length - 1];
@@ -29,17 +35,8 @@ namespace book2read
 				return;
 			}
 			Console.WriteLine("Current command: " + string.Join(" ", args));
-			try {
-				foreach (var command in GetCommands()) {
-					Console.WriteLine(command.Command);
-				}
-				ConsoleCommandDispatcher.DispatchCommand(GetCommands(), args, Console.Out, true);
-				Console.Read();
-			} catch (Exception e) {
-				Console.WriteLine(e.Message);
-				Console.WriteLine("Нажмите любую клавишу для выхода из программы...");
-				Console.Read();
-			}
+			Console.WriteLine("Нажмите любую клавишу для выхода из программы...");
+			Console.Read();
 		}
 
 		static void SampleCode() {
@@ -52,7 +49,7 @@ namespace book2read
 			
 			
 			// Get n-th line number from file
-			string FileName = @"D:\Temp\lines1-10.txt";
+			const string FileName = @"D:\Temp\lines1-10.txt";
 			string line = File.ReadLines(FileName).Skip(5).First();
 			long line_count = File.ReadLines(FileName).Count();
 			Console.WriteLine("Found {1} lines, here is line 6: {0}", line, line_count);
@@ -75,10 +72,20 @@ namespace book2read
 				Console.WriteLine(Environment.NewLine);
 			}
 		}
-		
-		public static IEnumerable<ConsoleCommand> GetCommands()
-		{
-			return ConsoleCommandDispatcher.FindCommandsInSameAssemblyAs(typeof(Program));
+
+		static void initAndWelcome() {
+			FileSystemService f = FileSystemService.Instance;
+			Console.WriteLine("Привет, читатель!");
+			Console.WriteLine();
+			Console.WriteLine("Твоя база данных по книгам обновлялась " + 
+			                  (f.isLibraryFileTooOld() ? "больше" : "меньше") +
+			                  " месяца назад.");
+			Console.WriteLine("В ней сейчас содержится " + f.getBookCount() + " записей о книгах.");
+			Console.WriteLine();
+			Console.WriteLine("Твоя локальная библиотека " + 
+			                  (f.isLibraryFound() ? 
+			                   "найдена в папке " + f.LibraryPath.FullName + "." :
+			                   "не найдена."));
 		}
 	}
 	
