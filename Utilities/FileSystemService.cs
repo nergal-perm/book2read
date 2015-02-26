@@ -91,7 +91,7 @@ namespace book2read.Utilities {
 		
 		DirectoryInfo getLibraryPath() {
 			foreach (var drive in DriveInfo.GetDrives()) {
-				if (drive.VolumeLabel.Equals("Big Storage")) {
+				if (drive.IsReady && drive.VolumeLabel.Equals("Big Storage")) {
 					return new DirectoryInfo(drive.Name + @"Library\");
 				}
 			}
@@ -105,9 +105,18 @@ namespace book2read.Utilities {
 				_toReadPath = new DirectoryInfo(@"D:\Temp\ToRead\");
 				_bookDbPath = new DirectoryInfo(@"D:\Temp\BookDb\");
 			} else {
-				_toReadPath = new DirectoryInfo(getDropboxFolder().FullName + @"ToRead\");
-				_bookDbPath = new DirectoryInfo(getDropboxFolder().FullName + @"BookDb\");
+				_toReadPath = new DirectoryInfo(getDropboxFolder().FullName + @"\ToRead\");
+				_bookDbPath = new DirectoryInfo(getDropboxFolder().FullName + @"\BookDb\");
 			}			
+			
+			if (!_toReadPath.Exists) {
+				_toReadPath.Create();
+			}
+			
+			if (!_bookDbPath.Exists) {
+				_bookDbPath.Create();
+			}
+			
 		}
 	
 		void checkFiles() {

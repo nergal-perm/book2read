@@ -84,7 +84,7 @@ namespace book2read
 			Console.WriteLine();
 			Console.WriteLine("Твоя локальная библиотека " + 
 			                  (f.isLibraryFound() ? 
-			                   "найдена в папке " + f.LibraryPath.FullName + "." :
+			                   "найдена в папке " + f.LibraryPath.FullName :
 			                   "не найдена."));
 		}
 	}
