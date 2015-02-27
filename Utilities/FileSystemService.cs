@@ -8,8 +8,13 @@
  */
 using System;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Linq;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Drive.v2;
+using Google.Apis.Drive.v2.Data;
+using Google.Apis.Services;
 
 namespace book2read.Utilities {
 	/// <summary>
@@ -30,6 +35,9 @@ namespace book2read.Utilities {
 		}
 		#endregion
 		
+		const string CLIENT_ID = "1068110686945-71nr4r2ttru1a0las2kaa2vth110evrc.apps.googleusercontent.com";
+		const string CLIENT_SECRET = "hwjCy1tXuh_ecG6iBPnBdrxg";
+		
 		DirectoryInfo _libraryPath;
 		public DirectoryInfo LibraryPath { get { return _libraryPath;} }
 		
@@ -42,15 +50,21 @@ namespace book2read.Utilities {
 		FileInfo _haveRead;
 		public FileInfo HaveReadFile { get { return _haveRead; } }
 		
-		FileInfo _toRead;
-		public FileInfo ToReadFile { get { return _toRead; } }
+		FileInfo _toReadLocal;
+		public FileInfo ToReadLocalFile { get { return _toReadLocal; } }
+		
+		FileInfo _toReadWeb;
+		public FileInfo ToReadWebFile { get { return _toReadWeb; } }
 		
 		FileInfo _report;
 		public FileInfo ReportFile { get { return _report; } }
 
 		public void initialize() {
 			findPaths();
-			checkFiles();
+			checkAndCreateFiles();
+			#if !WORK
+			authorizeInWebLibrary();
+			#endif
 			
 			#region Логирование для тестирования работы
 			if (_libraryPath == null || !_libraryPath.Exists) {
@@ -64,42 +78,27 @@ namespace book2read.Utilities {
 		}
 
 		public bool isLibraryFileTooOld() {
-			return (DateTime.Now - _toRead.CreationTime).Days > 30;
+			return (DateTime.Now - _toReadLocal.CreationTime).Days > 30;
 		}
 
 		public bool isLibraryFound() {
 			return _libraryPath.Exists;
 		}
-		public long getBookCount() {
-			return File.ReadLines(_toRead.FullName).Count();
+		
+		public long getBookCount() {	
+			return System.IO.File.ReadLines(_toReadLocal.FullName).Count();
 		}
 		
-		DirectoryInfo getDropboxFolder() {
-			var appDataPath = Environment.GetFolderPath(
-				                  Environment.SpecialFolder.ApplicationData);
-			var dbPath = Path.Combine(appDataPath, "Dropbox\\host.db");
-
-			if (!File.Exists(dbPath))
-				return null;
-
-			var lines = File.ReadAllLines(dbPath);
-			var dbBase64Text = Convert.FromBase64String(lines[1]);
-			var folderPath = Encoding.UTF8.GetString(dbBase64Text);
-
-			return new DirectoryInfo(folderPath);
+		public bool isWebLibraryAvailable() {
+			#if WORK
+			return false;
+			#else
+			return true;
+			#endif
 		}
 		
-		DirectoryInfo getLibraryPath() {
-			foreach (var drive in DriveInfo.GetDrives()) {
-				if (drive.IsReady && drive.VolumeLabel.Equals("Big Storage")) {
-					return new DirectoryInfo(drive.Name + @"Library\");
-				}
-			}
-			return null;
-		}
-	
 		void findPaths() {
-			_libraryPath = getLibraryPath() == null ? new DirectoryInfo(@"D:\Library\") : getLibraryPath();
+			_libraryPath = getLibraryPath() ?? new DirectoryInfo(@"D:\Library\");
 			
 			if (getDropboxFolder() == null) {
 				_toReadPath = new DirectoryInfo(@"D:\Temp\ToRead\");
@@ -116,13 +115,36 @@ namespace book2read.Utilities {
 			if (!_bookDbPath.Exists) {
 				_bookDbPath.Create();
 			}
-			
 		}
-	
-		void checkFiles() {
+
+		DirectoryInfo getDropboxFolder() {
+			var appDataPath = Environment.GetFolderPath(
+				                  Environment.SpecialFolder.ApplicationData);
+			var dbPath = Path.Combine(appDataPath, "Dropbox\\host.db");
+
+			if (!System.IO.File.Exists(dbPath))
+				return null;
+
+			var lines = System.IO.File.ReadAllLines(dbPath);
+			var dbBase64Text = Convert.FromBase64String(lines[1]);
+			var folderPath = Encoding.UTF8.GetString(dbBase64Text);
+
+			return new DirectoryInfo(folderPath);
+		}
+		
+		DirectoryInfo getLibraryPath() {
+			foreach (var drive in DriveInfo.GetDrives()) {
+				if (drive.IsReady && drive.VolumeLabel.Equals("Big Storage")) {
+					return new DirectoryInfo(drive.Name + @"Library\");
+				}
+			}
+			return null;
+		}
+		
+		void checkAndCreateFiles() {
 			_haveRead = new FileInfo(_bookDbPath.FullName + "HaveRead.txt");
 			if (!_haveRead.Exists) {
-				_haveRead.Create();
+				_haveRead.Create().Close();
 				LoggingService.Instance.RecordMessage("Создан файл \"HaveRead.txt\"", LoggingService.MessageType.System);
 			} else {
 				LoggingService.Instance.RecordMessage("Файл \"HaveRead.txt\" найден в папке " + _bookDbPath.FullName, LoggingService.MessageType.Info);
@@ -130,22 +152,64 @@ namespace book2read.Utilities {
 
 			_report = new FileInfo(_bookDbPath.FullName + "Report.txt");
 			if (!_report.Exists) {
-				_report.Create();
+				_report.Create().Close();
 				LoggingService.Instance.RecordMessage("Создан файл \"Report.txt\"", LoggingService.MessageType.System);
 			} else {
 				LoggingService.Instance.RecordMessage("Файл \"Report.txt\" найден в папке " + _bookDbPath.FullName, LoggingService.MessageType.Info);
 			}
 			
-			_toRead = new FileInfo(_bookDbPath.FullName + "ToRead.txt");
-			if (!_toRead.Exists) {
-				_toRead.Create();
-				LoggingService.Instance.RecordMessage("Создан файл \"ToRead.txt\"", LoggingService.MessageType.System);
+			_toReadLocal = new FileInfo(_bookDbPath.FullName + "ToReadLocal.txt");
+			if (!_toReadLocal.Exists) {
+				_toReadLocal.Create().Close();
+				LoggingService.Instance.RecordMessage("Создан файл \"ToReadLocal.txt\"", LoggingService.MessageType.System);
 			} else {
-				LoggingService.Instance.RecordMessage("Файл \"ToRead.txt\" найден в папке " + _bookDbPath.FullName, LoggingService.MessageType.Info);
+				LoggingService.Instance.RecordMessage("Файл \"ToReadLocal.txt\" найден в папке " + _bookDbPath.FullName, LoggingService.MessageType.Info);
 			}			
-			
+
+			_toReadWeb = new FileInfo(_bookDbPath.FullName + "ToReadWeb.txt");
+			if (!_toReadWeb.Exists) {
+				_toReadWeb.Create().Close();
+				LoggingService.Instance.RecordMessage("Создан файл \"ToReadWeb.txt\"", LoggingService.MessageType.System);
+			} else {
+				LoggingService.Instance.RecordMessage("Файл \"ToReadWeb.txt\" найден в папке " + _bookDbPath.FullName, LoggingService.MessageType.Info);
+			}				
 		}
 	
 	
+		void authorizeInWebLibrary() {
+
+            Console.WriteLine("Plus API - Service Account");
+            Console.WriteLine("==========================");
+
+			const String serviceAccountEmail = "SERVICE_ACCOUNT_EMAIL_HERE";
+			
+            var certificate = new X509Certificate2(@"key.p12", "notasecret", X509KeyStorageFlags.Exportable);
+
+            var credential = new ServiceAccountCredential(
+               new ServiceAccountCredential.Initializer(serviceAccountEmail)
+               {
+                   Scopes = new[] { DriveService.Scope.Drive, DriveService.Scope.DriveFile }
+               }.FromCertificate(certificate));
+
+            // Create the service.
+            var service = new DriveService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "Plus API Sample",
+            });
+
+			FilesResource.ListRequest request = service.Files.List();
+			FileList files = request.Execute();
+			
+            Console.WriteLine("  Файлов: " + files.Items.Count);
+
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+			
+		}
+
+		public FileInfo[] getCurrentQueue() {
+			return _toReadPath.GetFiles();
+		}
 	}
 }

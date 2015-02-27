@@ -24,30 +24,13 @@ namespace book2read
 			
 			// После получения команды exit организовать выход из консоли
 			
-			
-			if (args.Length > 0) {
-				//_arguments = new string[args.Length - 1];
-				//System.Array.Copy(args, 1, _arguments, 0, args.Length - 1);			
-			} else {
-				Console.WriteLine("Не указана команда для выполнения");
-				Console.WriteLine("Нажмите любую клавишу для выхода из программы...");
-				Console.Read();
-				return;
-			}
-			Console.WriteLine("Current command: " + string.Join(" ", args));
+			Console.WriteLine();
 			Console.WriteLine("Нажмите любую клавишу для выхода из программы...");
-			Console.Read();
+			Console.ReadKey();
+			return;
 		}
 
 		static void SampleCode() {
-			// Compile conditional sample, use WORK / HOME / TEST to mark dev environment
-			#if WORK
-			Console.WriteLine("This is WORK-DEBUG build");
-			#else	
-			Console.WriteLine("This is HOME-DEBUG build");
-			#endif
-			
-			
 			// Get n-th line number from file
 			const string FileName = @"D:\Temp\lines1-10.txt";
 			string line = File.ReadLines(FileName).Skip(5).First();
@@ -83,9 +66,16 @@ namespace book2read
 			Console.WriteLine("В ней сейчас содержится " + f.getBookCount() + " записей о книгах.");
 			Console.WriteLine();
 			Console.WriteLine("Твоя локальная библиотека " + 
-			                  (f.isLibraryFound() ? 
-			                   "найдена в папке " + f.LibraryPath.FullName :
-			                   "не найдена."));
+			                  (f.isLibraryFound() ? "найдена в папке " + f.LibraryPath.FullName : "не найдена."));
+			Console.WriteLine("Сетевая библиотека " + (f.isWebLibraryAvailable() ? "доступна." : "недоступна"));
+			Console.WriteLine();
+			Console.WriteLine("В твоем списке чтения сейчас " + f.getCurrentQueue().Count() + " книг:");
+			int i = 0;
+			foreach (var element in f.getCurrentQueue()) {
+				Console.WriteLine(++i + "\t" + element.Name);
+			}
+			Console.WriteLine();
+			
 		}
 	}
 	
