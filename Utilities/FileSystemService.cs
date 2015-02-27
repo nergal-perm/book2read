@@ -35,9 +35,6 @@ namespace book2read.Utilities {
 		}
 		#endregion
 		
-		const string CLIENT_ID = "1068110686945-71nr4r2ttru1a0las2kaa2vth110evrc.apps.googleusercontent.com";
-		const string CLIENT_SECRET = "hwjCy1tXuh_ecG6iBPnBdrxg";
-		
 		DirectoryInfo _libraryPath;
 		public DirectoryInfo LibraryPath { get { return _libraryPath;} }
 		
@@ -78,7 +75,8 @@ namespace book2read.Utilities {
 		}
 
 		public bool isLibraryFileTooOld() {
-			return (DateTime.Now - _toReadLocal.CreationTime).Days > 30;
+			_toReadLocal.Refresh();
+			return (DateTime.Now - _toReadLocal.LastWriteTime).Days > 30;
 		}
 
 		public bool isLibraryFound() {
@@ -86,8 +84,11 @@ namespace book2read.Utilities {
 		}
 		
 		public long getBookCount() {	
-			return System.IO.File.ReadLines(_toReadLocal.FullName).Count();
+			return LocalBoksCount + WebBooksCount;
 		}
+		
+		public int LocalBoksCount { get { return System.IO.File.ReadLines(_toReadLocal.FullName).Count(); } }
+		public int WebBooksCount { get { return System.IO.File.ReadLines(_toReadWeb.FullName).Count(); } }
 		
 		public bool isWebLibraryAvailable() {
 			#if WORK
@@ -208,8 +209,47 @@ namespace book2read.Utilities {
 			
 		}
 
-		public FileInfo[] getCurrentQueue() {
-			return _toReadPath.GetFiles();
+		public void updateLibrary() {
+			if (!isLibraryFound()) {
+				Console.WriteLine("Локальная библиотека не найдена, список локальных книг не будет обновлен.");
+			} else {
+				updateLocalLibrary();
+			}
+			
+			if(!isWebLibraryAvailable()) {
+				Console.WriteLine("Сетевая библиотека недоступна, список книг в облаке не будет обновлен.");
+			} else {
+				updateWebLibrary();
+			}
+		}
+
+		void updateLocalLibrary() {
+			var timeStart = DateTime.Now;
+			var files = _libraryPath.GetFiles("*.*", SearchOption.AllDirectories).Select(p => Path.GetFileName(p.FullName)).ToArray();
+			//var files= _libraryPath.GetFiles("*.*", SearchOption.AllDirectories).Select(p => p.FullName).ToArray();
+			System.IO.File.WriteAllLines(_toReadLocal.FullName, files, Encoding.UTF8);
+		}
+
+		void updateWebLibrary() {
+			throw new NotImplementedException();
+		}
+
+		public string[] getCurrentQueue() {
+			string[] files = _toReadPath.GetFiles().Select(p => p.Name).ToArray();
+			Array.Sort(files);
+			return files;
+			
+		}
+
+		public void archiveBook(FileInfo curFile) {
+			//TODO: Not yet implemented
+		}
+
+		public void removeBook(FileInfo curFile) {
+			foreach (var file in _libraryPath.GetFiles(curFile.Name, SearchOption.AllDirectories)) {
+				file.Delete();
+			}
+			curFile.Delete();
 		}
 	}
 }
