@@ -10,7 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Google.Apis.Drive.v2;
 using book2read.Utilities;
+using Google.Apis.Auth;
 
 namespace book2read {
 	class Program {
@@ -68,7 +70,7 @@ namespace book2read {
 			}   
 		}
 		
-		static void ShowPercentProgress(string message, int currElementIndex, int totalElementCount) {
+		public static void ShowPercentProgress(string message, int currElementIndex, int totalElementCount) {
 			if (currElementIndex < 0 || currElementIndex >= totalElementCount) {
 				throw new InvalidOperationException("currElement out of range");
 			}
@@ -129,10 +131,38 @@ namespace book2read {
 					FileInfo fileToRead = f.LibraryPath.GetFiles(fileName, SearchOption.AllDirectories)[0];
 					fileToRead.CopyTo(f.ToReadPath.FullName + fileName);
 				} else {
-					// choose book from web library
+					string fileId = System.IO.File.ReadLines(f.ToReadWebFile.FullName).Skip(element - local).First().Split(":".ToCharArray())[0];
+					Google.Apis.Drive.v2.Data.File file = f.WebService.Files.Get(fileId).Execute();
+					downloadFile(f.WebService, file, f.ToReadPath + file.Title);
 				}
 			}
 		}
+		
+		
+        public static Boolean downloadFile(DriveService _service, Google.Apis.Drive.v2.Data.File _fileResource, string _saveTo)
+        {
+
+            if (!String.IsNullOrEmpty(_fileResource.DownloadUrl))
+            {
+                try
+                {
+                    var x = _service.HttpClient.GetByteArrayAsync(_fileResource.DownloadUrl );
+                    byte[] arrBytes = x.Result;
+                    System.IO.File.WriteAllBytes(_saveTo, arrBytes);
+                    return true;                  
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("An error occurred: " + e.Message);
+                    return false;
+                }
+            }
+            else
+            {
+                // The file doesn't have any content stored on Drive.
+                return false;
+            }
+        }
 		
 		static List<int> getRandomSequence(int index, int maxValue) {
 			var r = new Random();
@@ -199,6 +229,14 @@ namespace book2read {
 			Console.Write("Подтвердите операцию (нажмите [Enter]): ");
 			if (Console.ReadKey().Key == ConsoleKey.Enter) {
 				System.IO.File.AppendAllText(f.HaveReadFile.FullName, bookRecord + Environment.NewLine);
+				// if this is a web-file, store it's Id in a file
+				var result = File.ReadAllLines(f.ToReadWebFile.FullName).FirstOrDefault(s => s.Contains(curFile.Name));
+				if (result != null) {
+					var id = result.Split(":".ToCharArray())[0];
+					System.IO.File.AppendAllText(f.HaveReadWebIds.FullName, id + Environment.NewLine);
+				}
+				
+				
 				if (needToArchive) {
 					f.archiveBook(curFile);
 				}
