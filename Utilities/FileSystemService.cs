@@ -73,16 +73,6 @@ namespace book2read.Utilities {
 			} catch (Exception e) {
 				_isWebLibraryAvailable = false;
 			}
-			
-			#region Логирование для тестирования работы
-			if (_libraryPath == null || !_libraryPath.Exists) {
-				LoggingService.Instance.RecordMessage("Локальная библиотека не найдена, приложение завершает работу", LoggingService.MessageType.Error);
-			}
-			
-			LoggingService.Instance.RecordMessage("Library path set as " + _libraryPath.FullName, LoggingService.MessageType.Info);
-			LoggingService.Instance.RecordMessage("ToRead path set as " + _toReadPath.FullName, LoggingService.MessageType.Info);
-			LoggingService.Instance.RecordMessage("Book database path set as " + _bookDbPath.FullName, LoggingService.MessageType.Info);
-			#endregion
 		}
 
 		public bool isLibraryFileTooOld() {
@@ -153,42 +143,26 @@ namespace book2read.Utilities {
 			_haveRead = new FileInfo(_bookDbPath.FullName + "HaveRead.txt");
 			if (!_haveRead.Exists) {
 				_haveRead.Create().Close();
-				LoggingService.Instance.RecordMessage("Создан файл \"HaveRead.txt\"", LoggingService.MessageType.System);
-			} else {
-				LoggingService.Instance.RecordMessage("Файл \"HaveRead.txt\" найден в папке " + _bookDbPath.FullName, LoggingService.MessageType.Info);
-			}
-
+			} 
 			_report = new FileInfo(_bookDbPath.FullName + "Report.txt");
 			if (!_report.Exists) {
 				_report.Create().Close();
-				LoggingService.Instance.RecordMessage("Создан файл \"Report.txt\"", LoggingService.MessageType.System);
-			} else {
-				LoggingService.Instance.RecordMessage("Файл \"Report.txt\" найден в папке " + _bookDbPath.FullName, LoggingService.MessageType.Info);
-			}
+			} 
 			
 			_toReadLocal = new FileInfo(_bookDbPath.FullName + "ToReadLocal.txt");
 			if (!_toReadLocal.Exists) {
 				_toReadLocal.Create().Close();
-				LoggingService.Instance.RecordMessage("Создан файл \"ToReadLocal.txt\"", LoggingService.MessageType.System);
-			} else {
-				LoggingService.Instance.RecordMessage("Файл \"ToReadLocal.txt\" найден в папке " + _bookDbPath.FullName, LoggingService.MessageType.Info);
-			}
+			} 
 
 			_toReadWeb = new FileInfo(_bookDbPath.FullName + "ToReadWeb.txt");
 			if (!_toReadWeb.Exists) {
 				_toReadWeb.Create().Close();
-				LoggingService.Instance.RecordMessage("Создан файл \"ToReadWeb.txt\"", LoggingService.MessageType.System);
-			} else {
-				LoggingService.Instance.RecordMessage("Файл \"ToReadWeb.txt\" найден в папке " + _bookDbPath.FullName, LoggingService.MessageType.Info);
-			}
+			} 
 			
 			_haveReadWebIds = new FileInfo(_bookDbPath.FullName + "WebIds.txt");
 			if (!_haveReadWebIds.Exists) {
 				_haveReadWebIds.Create().Close();
-				LoggingService.Instance.RecordMessage("Создан файл \"WebIds.txt\"", LoggingService.MessageType.System);
-			} else {
-				LoggingService.Instance.RecordMessage("Файл \"WebIds.txt\" найден в папке " + _bookDbPath.FullName, LoggingService.MessageType.Info);
-			}			
+			} 			
 		}
 		
 		
@@ -215,12 +189,12 @@ namespace book2read.Utilities {
 				HttpClientInitializer = credential,
 				ApplicationName = "Web Library Crawler",
 			});
-			
 
 			Console.Clear();
 		}
 
 		public void updateLibrary() {
+			var timeStart = DateTime.Now;
 			if (!isLibraryFound()) {
 				Console.WriteLine("Локальная библиотека не найдена, список локальных книг не будет обновлен.");
 			} else {
@@ -232,10 +206,10 @@ namespace book2read.Utilities {
 			} else {
 				updateWebLibrary();
 			}
+			UserInterface.confirmUpdateOperation(DateTime.Now - timeStart);
 		}
 
 		void updateLocalLibrary() {
-			var timeStart = DateTime.Now;
 			Console.Write("Получаю список файлов локальной библиотеки... ");
 			var allFiles = _libraryPath.GetFiles("*.*", SearchOption.AllDirectories).ToList(); //.Select(p => p.Name).ToArray();
 			var files = new List<FileInfo>();
@@ -247,67 +221,180 @@ namespace book2read.Utilities {
 				    file.Name.ToUpper().Contains(".TXT")) {
 					files.Add(file);
 				}
-				Program.ShowPercentProgress("Обновляю библиотеку...", i, allFiles.Count);
+				UserInterface.ShowPercentProgress("Обновляю библиотеку...", i, allFiles.Count);
 				i++;
 			}
 			System.IO.File.WriteAllLines(_toReadLocal.FullName, files.Select(p => p.Name).ToArray(), Encoding.UTF8);
 			
 		}
 
-		void updateWebLibrary() {
-			Console.Write("Получаю список файлов сетевой библиотеки... ");
+		/// <summary>
+		/// Подключается к облачному хранилищу Google Drive и получает списки файлов
+		/// пачками по MaxResults штук
+		/// </summary>
+		/// <returns>Список всех доступных файлов в облачном хранилище</returns>
+		private List<Google.Apis.Drive.v2.Data.File> getFileListFromOnlineLibrary() {
 			FilesResource.ListRequest request = _webService.Files.List();
 			request.Q = "mimeType != 'application/vnd.google-apps.folder'";
-			request.MaxResults = 1000;
+			request.MaxResults = 100;
 			var result = new List<Google.Apis.Drive.v2.Data.File>();
 
 			int i = 0;
 			do {
 				try {
+					UserInterface.updateLongOperationStatus(i);
 					FileList allFiles = request.Execute();
-			        result.AddRange(allFiles.Items);
-        			request.PageToken = allFiles.NextPageToken;
-        			i++;
-      			} catch (Exception e) {
-        			Console.WriteLine("An error occurred: " + e.Message);
-        			request.PageToken = null;
-      			}
-    		} while (!String.IsNullOrEmpty(request.PageToken));
-			Console.WriteLine("готово!");
+					result.AddRange(allFiles.Items);
+					request.PageToken = allFiles.NextPageToken;
+					i++;
+				} catch (Exception e) {
+					Console.WriteLine(" Ошибка!");
+					request.PageToken = null;
+					_isWebLibraryAvailable = false;
+				}
+			} while (!String.IsNullOrEmpty(request.PageToken));		
 
-			i = 0;
+			return result;
+		}
+		
+		/// <summary>
+		/// Получает из всего списка доступных в облаке файлов файлы с книгами
+		/// </summary>
+		/// <param name="result"></param>
+		/// <returns></returns>
+		private List<Google.Apis.Drive.v2.Data.File>filterOnlineFilesList(List<Google.Apis.Drive.v2.Data.File> result) {
+			int i = 0;
 			var files = new List<Google.Apis.Drive.v2.Data.File>();
 			var ids = System.IO.File.ReadAllLines(_haveReadWebIds.FullName).ToList();
 			foreach (var file in result) {
 				if (!ids.Contains(file.Id) && (file.Title.ToUpper().Contains(".PDF") || file.Title.ToUpper().Contains(".ZIP") ||
-				    file.Title.ToUpper().Contains(".RAR") || file.Title.ToUpper().Contains(".FB2") || 
+				    file.Title.ToUpper().Contains(".RAR") || file.Title.ToUpper().Contains(".FB2") ||
 				    file.Title.ToUpper().Contains(".DJV") || file.Title.ToUpper().Contains(".DOC") ||
 				    file.Title.ToUpper().Contains(".TXT"))) {
 					files.Add(file);
 				}
-				Program.ShowPercentProgress("Обновляю библиотеку...", i, result.Count);
+				UserInterface.ShowPercentProgress("Обновляю библиотеку...", i, result.Count);
 				i++;
 			}
-			System.IO.File.WriteAllLines(_toReadWeb.FullName, files.Select(p => p.Id + ": " + p.OriginalFilename).ToArray(), Encoding.UTF8);
-			Console.Read();
+			
+			return files;
 		}
 
-		public string[] getCurrentQueue() {
-			string[] files = _toReadPath.GetFiles().Select(p => p.Name).ToArray();
-			Array.Sort(files);
+		/// <summary>
+		/// Записывает данные о найденных в облаке книгах в файл БД
+		/// </summary>
+		/// <param name="list"></param>
+		void updateWebLibraryFile(List<Google.Apis.Drive.v2.Data.File> list) {
+			System.IO.File.WriteAllLines(_toReadWeb.FullName, list.Select(p => p.Id + ": " + p.OriginalFilename).ToArray(), Encoding.UTF8);
+		}
+		
+		void updateWebLibrary() {
+			UserInterface.showMessage("Получаю список файлов сетевой библиотеки... ");
+			
+			var result = getFileListFromOnlineLibrary();
+			if (result.Count == 0) {
+				return;
+			}
+			
+			UserInterface.showMessage("готово!" + Environment.NewLine);
+			
+			updateWebLibraryFile(filterOnlineFilesList(result));
+			
+			
+		}
+
+		public FileInfo[] getCurrentQueue() {
+			FileInfo[] files = _toReadPath.GetFiles().ToArray();
+			Array.Sort(files, new FileComparer());
 			return files;
 			
 		}
 
 		public void archiveBook(FileInfo curFile) {
-			//TODO: Not yet implemented
+			// TODO: Not yet implemented
+			// 
 		}
 
-		public void removeBook(FileInfo curFile) {
+		/// <summary>
+		/// Удаляет файл из локальной библиотеки
+		/// </summary>
+		/// <param name="curFile">Файл для удаления</param>
+		public void removeFromLibrary(FileInfo curFile) {
 			foreach (var file in _libraryPath.GetFiles(curFile.Name, SearchOption.AllDirectories)) {
 				file.Delete();
+			}			
+		}
+		
+		/// <summary>
+		/// Удаляет файл из списка чтения
+		/// </summary>
+		/// <param name="curFile">Файл для удаления</param>
+		public void removeFromQueue(FileInfo curFile) {
+			curFile.Delete();			
+		}
+
+		/// <summary>
+		/// Записывает информацию о книге в читательский дневник. Для "облачных" файлов регистрирует
+		/// ID в списке прочитанных, чтобы не предлагать этот файл в будущем
+		/// </summary>
+		/// <param name="bookInfo">Структура: строка для записи в дневник и ссылка на файл книги</param>
+		public void appendBookInfoToReadLog(BookMetaData bookInfo) {
+			System.IO.File.AppendAllText(_haveRead.FullName, bookInfo.dbRow + Environment.NewLine);
+			appendIdToWebIds(bookInfo.file);
+		}
+		
+		public void appendIdToWebIds(FileInfo file) {
+			// если файл был получен из облачной библиотеки, сохраним его ID в список ID прочитанных книг,
+			// чтобы не предлагать его к прочтению в будущем
+			var result = System.IO.File.ReadAllLines(_toReadWeb.FullName).FirstOrDefault(s => s.Contains(file.Name));
+			if (result != null) {
+				var id = result.Split(":".ToCharArray())[0];
+				System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);				
+			}			
+		}
+		
+		/// <summary>
+		/// Возвращает указанный по индексу файл из очереди чтения
+		/// </summary>
+		/// <param name="bookIndex">Индекс возвращаемого файла</param>
+		/// <returns>FileInfo: файл с книгой</returns>
+		public FileInfo getBookFromQueue(int bookIndex) {
+			return getCurrentQueue()[bookIndex];
+		}
+
+		public void getBookFromLocalLibrary(int element) {
+			string fileName = System.IO.File.ReadLines(_toReadLocal.FullName).Skip(element).First();
+			FileInfo fileToRead = _libraryPath.GetFiles(fileName, SearchOption.AllDirectories)[0];
+			fileToRead.CopyTo(_toReadPath.FullName + fileName);
+		}
+
+		public void getBookFromOnlineLibrary(int element) {
+			string fileId = System.IO.File.ReadLines(_toReadWeb.FullName).Skip(element).First().Split(":".ToCharArray())[0];
+			Google.Apis.Drive.v2.Data.File file = _webService.Files.Get(fileId).Execute();
+			downloadFile(_webService, file, _toReadPath + file.Title);
+		}
+		
+		
+		public static Boolean downloadFile(DriveService _service, Google.Apis.Drive.v2.Data.File _fileResource, string _saveTo) {
+
+			if (!String.IsNullOrEmpty(_fileResource.DownloadUrl)) {
+				try {
+					var x = _service.HttpClient.GetByteArrayAsync(_fileResource.DownloadUrl);
+					byte[] arrBytes = x.Result;
+					System.IO.File.WriteAllBytes(_saveTo, arrBytes);
+					return true;                  
+				} catch (Exception e) {
+					Console.WriteLine("An error occurred: " + e.Message);
+					return false;
+				}
+			} else {
+				// The file doesn't have any content stored on Drive.
+				return false;
 			}
-			curFile.Delete();
+		}
+
+		public string[] getWholeReadingLog() {
+			return System.IO.File.ReadAllLines(_haveRead.FullName);
 		}
 	}
 }
