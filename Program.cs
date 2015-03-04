@@ -15,6 +15,7 @@ namespace book2read {
 		
 		public static void Main(string[] args) {   
 			var f = FileSystemService.Instance;
+			              
 			do {
 				UserInterface.showHomeScreen();
 			} while (dispatchCommand());

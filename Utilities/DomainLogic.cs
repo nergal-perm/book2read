@@ -45,7 +45,7 @@ namespace book2read.Utilities {
 			fs.appendBookInfoToReadLog(bookInfo);
 
 			if (bookInfo.dbRow.Contains("*")) {
-				fs.archiveBook(bookInfo.file);
+				fs.archiveBook(bookInfo);
 			}
 
 			fs.removeFromLibrary(bookInfo.file);

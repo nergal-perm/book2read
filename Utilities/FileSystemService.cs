@@ -236,7 +236,7 @@ namespace book2read.Utilities {
 		private List<Google.Apis.Drive.v2.Data.File> getFileListFromOnlineLibrary() {
 			FilesResource.ListRequest request = _webService.Files.List();
 			request.Q = "mimeType != 'application/vnd.google-apps.folder'";
-			request.MaxResults = 100;
+			request.MaxResults = 1000;
 			var result = new List<Google.Apis.Drive.v2.Data.File>();
 
 			int i = 0;
@@ -310,9 +310,10 @@ namespace book2read.Utilities {
 			
 		}
 
-		public void archiveBook(FileInfo curFile) {
-			// TODO: Not yet implemented
-			// 
+		public void archiveBook(BookMetaData bookInfo) {
+			var gdPath = Environment.GetFolderPath(
+				Environment.SpecialFolder.UserProfile) + @"\Google Диск\Book Archive\";
+			System.IO.File.Copy(bookInfo.file.FullName, gdPath + bookInfo.dbRow.Split("[".ToCharArray())[0].Trim(" ".ToCharArray()) + bookInfo.file.Extension);
 		}
 
 		/// <summary>
@@ -320,6 +321,7 @@ namespace book2read.Utilities {
 		/// </summary>
 		/// <param name="curFile">Файл для удаления</param>
 		public void removeFromLibrary(FileInfo curFile) {
+			if (!isLibraryFound()) { return; }
 			foreach (var file in _libraryPath.GetFiles(curFile.Name, SearchOption.AllDirectories)) {
 				file.Delete();
 			}			
