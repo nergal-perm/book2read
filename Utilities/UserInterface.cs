@@ -218,10 +218,54 @@ namespace book2read.Utilities {
 			confirmOperation("", "", "Нажмите Enter для продолжения...", ConsoleKey.Enter);
 		}
 
-		public static void showStatistics(Stats stats) {
-			Console.Clear();
-			Console.WriteLine("Months: {0}\nBooks: {1}\nPages: {2}", stats.months, stats.bookCount, stats.pagesCount);
+		public static void showStatistics(Stats stats, StatsPeriod sp) {
 
+			string header;
+			switch (sp) {
+				case StatsPeriod.ThisMonth:
+					header = string.Format("Данные за текущий месяц {0:MMMM}:", DateTime.Today);
+					break;
+				case StatsPeriod.YearToDate:
+					header = string.Format("Данные c начала {0:yyyy} года:", DateTime.Today);
+					break;
+				case StatsPeriod.Total:
+					header = string.Format("Данные за всю историю чтения (начиная с {0:MMMMM yyyy} года):", stats.startDate);
+					break;
+				default:
+					return;
+			}
+			
+			ColoredConsoleWrite(ConsoleColor.DarkGray, header + Environment.NewLine);
+			//ColoredConsoleWrite(ConsoleColor.DarkGray, "".PadRight(header.Length, "="[0]) + Environment.NewLine);
+	
+			Console.Write("Прочитано:\t");
+			ColoredConsoleWrite(ConsoleColor.Cyan, string.Format("{0} книг\t\t", stats.bookCount));
+			Console.Write("Объем:\t\t");
+			ColoredConsoleWrite(ConsoleColor.Cyan, string.Format("{0} страниц\n", stats.pagesCount));         
+
+			Console.Write("Новых книг:\t");
+			ColoredConsoleWrite(ConsoleColor.Cyan, string.Format("{0} книг\t\t", stats.newBooks));
+			Console.Write("Понравилось:\t");
+			ColoredConsoleWrite(ConsoleColor.Cyan, string.Format("{0} книг\n", stats.likedBooks));
+			
+			Console.Write("Средний темп чтения: ");
+			ColoredConsoleWrite(ConsoleColor.Green, string.Format("{0:##.00} книг ", (double)stats.bookCount / stats.months));
+			Console.Write("или ");
+			ColoredConsoleWrite(ConsoleColor.Green, string.Format("{0:##.00} страниц ", (double)stats.pagesCount / stats.months));
+			Console.WriteLine("в месяц.");
+			Console.Write("Средний рейтинг прочитанных книг: ");
+			ColoredConsoleWrite(ConsoleColor.Green, string.Format("{0:##.00}.", (double)stats.cumulativeRating / stats.bookCount) + Environment.NewLine);
+			
+			Console.WriteLine();
+		}
+
+		public static void showStatisticsHeader() {
+			Console.Clear();
+
+			string header = string.Format("Отчет по статистике чтения:");
+			Console.WriteLine(header);
+			Console.WriteLine("".PadRight(header.Length, "="[0]));
+			Console.WriteLine();
 		}
 	}
 }
