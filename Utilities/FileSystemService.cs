@@ -16,6 +16,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v2;
 using Google.Apis.Drive.v2.Data;
 using Google.Apis.Services;
+using EvernoteSDK;
 
 namespace book2read.Utilities {
 	/// <summary>
@@ -72,6 +73,23 @@ namespace book2read.Utilities {
 				_isWebLibraryAvailable = true;
 			} catch (Exception e) {
 				_isWebLibraryAvailable = false;
+			}
+			Console.WriteLine("Connecting to Evernote...");
+			Console.ReadLine();
+			try {
+				ENSession.SetSharedSessionDeveloperToken("",
+				                                         "");
+				if (!ENSession.SharedSession.IsAuthenticated) {
+					ENSession.SharedSession.AuthenticateToEvernote();
+					Console.WriteLine("Got Note");
+					Console.ReadLine();
+				}				
+			} catch (Exception e) {
+				Console.WriteLine(e.Message);
+				Console.ReadLine();
+			} finally {
+				Console.WriteLine("What the hell?");
+				Console.ReadLine();
 			}
 		}
 
