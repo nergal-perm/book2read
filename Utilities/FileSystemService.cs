@@ -74,23 +74,6 @@ namespace book2read.Utilities {
 			} catch (Exception e) {
 				_isWebLibraryAvailable = false;
 			}
-			Console.WriteLine("Connecting to Evernote...");
-			Console.ReadLine();
-			try {
-				ENSession.SetSharedSessionDeveloperToken("",
-				                                         "");
-				if (!ENSession.SharedSession.IsAuthenticated) {
-					ENSession.SharedSession.AuthenticateToEvernote();
-					Console.WriteLine("Got Note");
-					Console.ReadLine();
-				}				
-			} catch (Exception e) {
-				Console.WriteLine(e.Message);
-				Console.ReadLine();
-			} finally {
-				Console.WriteLine("What the hell?");
-				Console.ReadLine();
-			}
 		}
 
 		public bool isLibraryFileTooOld() {

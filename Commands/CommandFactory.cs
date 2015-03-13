@@ -45,6 +45,9 @@ namespace book2read.Commands {
 					 * выбрать книги, содержащие какое-нибудь слово в названии.
 					 */
 					break;
+				case "EVERNOTE":
+					command = new EvernoteCommand(commandLine);
+					break;
 				default:
 					command = new HelpCommand(commandLine);
 					break;
