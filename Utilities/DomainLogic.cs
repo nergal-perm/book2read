@@ -14,6 +14,7 @@ using System.Globalization;
 
 namespace book2read.Utilities {
 	public struct Stats {
+		public StatsPeriod period;
 		public int months;
 		public int bookCount;
 		public int pagesCount;
@@ -21,10 +22,12 @@ namespace book2read.Utilities {
 		public int likedBooks;
 		public int cumulativeRating;
 		public DateTime startDate;
+		public int secondsReading;
 	}
 	
 	public enum StatsPeriod {
 		ThisMonth,
+		PrevMonth,
 		YearToDate,
 		Total
 	}
@@ -58,11 +61,13 @@ namespace book2read.Utilities {
 			
 			/* Собираем статистику по трем периодам:
 			 *  - текущий месяц
+			 *  - предыдущий месяц
 			 *  - с начала года
 			 *  - с начала истории
 			 */
 			
 			var statsMonth = new Stats();
+			var statsPrevMonth = new Stats();
 			var statsYTD = new Stats();
 			var statsTotal = new Stats();
 			var startDate = new DateTime(0L);
@@ -107,17 +112,41 @@ namespace book2read.Utilities {
 						statsMonth.cumulativeRating += lineRating;											
 					}
 				}
+				
+				// отбираем статистику для предыдущего месяца
+				statsPrevMonth.startDate = new DateTime(DateTime.Today.Year,DateTime.Today.Month,1).AddMonths(-1);
+				if (lineDate.Year == statsPrevMonth.startDate.Year && lineDate.Month == statsPrevMonth.startDate.Month) {
+						statsPrevMonth.bookCount++;
+						statsPrevMonth.pagesCount += linePages;
+						if (isNew)
+							statsPrevMonth.newBooks++;
+						if (isLiked)
+							statsPrevMonth.likedBooks++;
+						statsPrevMonth.cumulativeRating += lineRating;																
+				}
 
 			}	
 			statsTotal.months = MonthDiff(startDate, DateTime.Today) + 1;
-			statsTotal.startDate = startDate;
 			statsYTD.months = DateTime.Today.Month;
 			statsMonth.months = 1;
+			statsPrevMonth.months = 1;
 			
-			UserInterface.showStatisticsHeader();
-			UserInterface.showStatistics(statsMonth, StatsPeriod.ThisMonth);
-			UserInterface.showStatistics(statsYTD, StatsPeriod.YearToDate);
-			UserInterface.showStatistics(statsTotal, StatsPeriod.Total);
+			statsMonth.period=StatsPeriod.ThisMonth;
+			statsPrevMonth.period = StatsPeriod.PrevMonth;
+			statsYTD.period = StatsPeriod.YearToDate;
+			statsTotal.period = StatsPeriod.Total;
+
+			statsMonth.startDate = DateTime.Today;
+			statsYTD.startDate = new DateTime(DateTime.Today.Year,1,1);
+			statsTotal.startDate = startDate;
+			
+			statsMonth.secondsReading = 56659;
+			statsPrevMonth.secondsReading = 52058;
+			statsYTD.secondsReading = 43994 + 52058 + 56659;
+			statsTotal.secondsReading = statsYTD.secondsReading + 19076;
+			
+			UserInterface.showStatisticsTable(new [] {statsMonth, statsPrevMonth, statsYTD, statsTotal});
+			
 			UserInterface.confirmOperation("", "", "Нажмите Enter для продолжения...", ConsoleKey.Enter);
 			
 
@@ -128,3 +157,4 @@ namespace book2read.Utilities {
 		}
 	}
 }
+

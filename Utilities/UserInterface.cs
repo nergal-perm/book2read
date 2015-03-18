@@ -9,6 +9,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using book2read.Commands;
 
@@ -22,6 +23,9 @@ namespace book2read.Utilities {
 	/// Description of UserInterface.
 	/// </summary>
 	public static class UserInterface {
+		private const int TAB_WIDTH = 10;
+		private const int FIRST_COL_WIDTH = 16;
+		
 		public static void showHomeScreen() {
 			clearConsole();
 			welcomeUser();
@@ -55,7 +59,7 @@ namespace book2read.Utilities {
 
 		static void librariesAvailability() {
 			if (FileSystemService.Instance.isLibraryFound()) {
-				Console.Write("Твоя локальная библиотека найдена в папке "); 
+				Console.Write("Твоя локальная библиотека найдена в папке ");
 				ColoredConsoleWrite(ConsoleColor.Yellow, FileSystemService.Instance.LibraryPath.FullName + Environment.NewLine);
 			} else {
 				ColoredConsoleWrite(ConsoleColor.Red, "Твоя локальная библиотека не найдена." + Environment.NewLine);
@@ -114,7 +118,7 @@ namespace book2read.Utilities {
 			int.TryParse(Console.ReadLine(), out pageCount);
 			Console.Write("Введите рейтинг по 10-балльной шкале: ");
 			int rating;
-			int.TryParse(Console.ReadLine(), out rating);			
+			int.TryParse(Console.ReadLine(), out rating);
 			Console.Write("Введите доп.информацию [*^+@]: ");
 			string code = Console.ReadLine();
 			bookInfo.dbRow = string.Format("{0:yyyyMMdd} - " + title + ", автор " + author + " [" + pageCount + ":" + rating + "]" + code, DateTime.Today);
@@ -127,10 +131,10 @@ namespace book2read.Utilities {
 		/// <param name="bookInfo">Данные о книге, которую планируется "прочитать"</param>
 		/// <returns></returns>
 		public static bool confirmReadOperation(BookMetaData bookInfo) {
-			return confirmOperation("В архиве будет создана следующая запись:", 
-				bookInfo.dbRow,
-				"Подтвердите операцию (нажмите [Enter]): ",
-				ConsoleKey.Enter);
+			return confirmOperation("В архиве будет создана следующая запись:",
+			                        bookInfo.dbRow,
+			                        "Подтвердите операцию (нажмите [Enter]): ",
+			                        ConsoleKey.Enter);
 		}
 
 		/// <summary>
@@ -139,23 +143,23 @@ namespace book2read.Utilities {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		public static bool confirmDeleteFromQueueOperation(string name) {
-			return confirmOperation("Следующий файл будет удален из списка чтения:", 
-				name,
-				"Подтвердите операцию (нажмите [Enter]): ",
-				ConsoleKey.Enter);
+			return confirmOperation("Следующий файл будет удален из списка чтения:",
+			                        name,
+			                        "Подтвердите операцию (нажмите [Enter]): ",
+			                        ConsoleKey.Enter);
 		}
 
 		public static bool confirmDeleteFromLibraryOperation() {
 			return confirmOperation("", "",
-				"Удалить его также и из библиотеки? [Enter] = Да",
-				ConsoleKey.Enter);			
+			                        "Удалить его также и из библиотеки? [Enter] = Да",
+			                        ConsoleKey.Enter);
 		}
 
 		public static bool confirmUpdateOperation(TimeSpan timeSpan) {
-			return confirmOperation("Библиотека обновлена за:", 
-				timeSpan.Seconds + " секунд",
-				"Нажмите Enter для продолжения.",
-				ConsoleKey.Enter);
+			return confirmOperation("Библиотека обновлена за:",
+			                        timeSpan.Seconds + " секунд",
+			                        "Нажмите Enter для продолжения.",
+			                        ConsoleKey.Enter);
 		}
 		
 		public static bool confirmOperation(string description, string argument, string question, ConsoleKey keyToWait) {
@@ -195,70 +199,172 @@ namespace book2read.Utilities {
 			TextInfo myTI;
 			var r = new Regex(@"\p{IsCyrillic}");
 			myTI = r.IsMatch(text) ? new CultureInfo("ru-RU", false).TextInfo : new CultureInfo("en-US", false).TextInfo;
-			return myTI.ToTitleCase(text.ToLower());			
+			return myTI.ToTitleCase(text.ToLower());
 		}
 
 		public static void showHelp() {
 			Console.Clear();
 			Console.WriteLine("Перечень доступных команд:");
 			ColoredConsoleWrite(ConsoleColor.Green, "   update\t");
-			Console.WriteLine("Обновить данные о книгах в доступных библиотеках.");			
+			Console.WriteLine("Обновить данные о книгах в доступных библиотеках.");
 			ColoredConsoleWrite(ConsoleColor.Green, "   get N\t");
 			Console.WriteLine("Случайным образом выбрать N книг для чтения.");
 			ColoredConsoleWrite(ConsoleColor.Green, "   read N\t");
-			Console.WriteLine("Записать информацию о прочитанной книге в дневник,");			
+			Console.WriteLine("Записать информацию о прочитанной книге в дневник,");
 			Console.WriteLine("\t\tудалить файл из библиотеки или переместить его в архив.");
 			ColoredConsoleWrite(ConsoleColor.Green, "   delete N\t");
 			Console.WriteLine("Удалить книгу из списка и, возможно, из библиотеки, не читая.");
 			ColoredConsoleWrite(ConsoleColor.Green, "   clear\t");
-			Console.WriteLine("Обновить статусную информацию.");			
+			Console.WriteLine("Обновить статусную информацию.");
 			ColoredConsoleWrite(ConsoleColor.Green, "   exit\t\t");
-			Console.WriteLine("Выход из приложения.");				
+			Console.WriteLine("Выход из приложения.");
 			
 			confirmOperation("", "", "Нажмите Enter для продолжения...", ConsoleKey.Enter);
 		}
 
-		public static void showStatistics(Stats stats, StatsPeriod sp) {
-
-			string header;
-			switch (sp) {
-				case StatsPeriod.ThisMonth:
-					header = string.Format("Данные за текущий месяц {0:MMMM}:", DateTime.Today);
-					break;
-				case StatsPeriod.YearToDate:
-					header = string.Format("Данные c начала {0:yyyy} года:", DateTime.Today);
-					break;
-				case StatsPeriod.Total:
-					header = string.Format("Данные за всю историю чтения (начиная с {0:MMMMM yyyy} года):", stats.startDate);
-					break;
-				default:
-					return;
-			}
-			
-			ColoredConsoleWrite(ConsoleColor.DarkGray, header + Environment.NewLine);
-			//ColoredConsoleWrite(ConsoleColor.DarkGray, "".PadRight(header.Length, "="[0]) + Environment.NewLine);
-	
-			Console.Write("Прочитано:\t");
-			ColoredConsoleWrite(ConsoleColor.Cyan, string.Format("{0} книг\t\t", stats.bookCount));
-			Console.Write("Объем:\t\t");
-			ColoredConsoleWrite(ConsoleColor.Cyan, string.Format("{0} страниц\n", stats.pagesCount));         
-
-			Console.Write("Новых книг:\t");
-			ColoredConsoleWrite(ConsoleColor.Cyan, string.Format("{0} книг\t\t", stats.newBooks));
-			Console.Write("Понравилось:\t");
-			ColoredConsoleWrite(ConsoleColor.Cyan, string.Format("{0} книг\n", stats.likedBooks));
-			
-			Console.Write("Средний темп чтения: ");
-			ColoredConsoleWrite(ConsoleColor.Green, string.Format("{0:##.00} книг ", (double)stats.bookCount / stats.months));
-			Console.Write("или ");
-			ColoredConsoleWrite(ConsoleColor.Green, string.Format("{0:##.00} страниц ", (double)stats.pagesCount / stats.months));
-			Console.WriteLine("в месяц.");
-			Console.Write("Средний рейтинг прочитанных книг: ");
-			ColoredConsoleWrite(ConsoleColor.Green, string.Format("{0:##.00}.", (double)stats.cumulativeRating / stats.bookCount) + Environment.NewLine);
-			
-			Console.WriteLine();
+		private static string getStatHeaderLine(System.Collections.Generic.IReadOnlyList<Stats> stats) {
+			var sb = new StringBuilder();
+			sb.Append("\t\t")
+				.Append(string.Format("{0:MMMMM}",stats[0].startDate).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:MMMMM}",stats[1].startDate).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:yyyy}",stats[2].startDate).PadLeft(TAB_WIDTH," "[0]))
+				.Append("Всего".PadLeft(TAB_WIDTH," "[0]));	
+			return sb.ToString();
 		}
+		private static string getSecondsReadingLine(Stats[] stats) {
+			var sb = new StringBuilder();
+			sb.Append(stats[0].secondsReading.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[1].secondsReading.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[2].secondsReading.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[3].secondsReading.ToString().PadLeft(TAB_WIDTH," "[0]));			
+			return sb.ToString();
+		}
+		private static string getBookCountLine(Stats[] stats) {
+			var sb = new StringBuilder();
+			sb.Append(stats[0].bookCount.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[1].bookCount.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[2].bookCount.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[3].bookCount.ToString().PadLeft(TAB_WIDTH," "[0]));			
+			return sb.ToString();			
+		}
+		private static string getNewBooksLine(Stats[] stats) {
+			var sb = new StringBuilder();
+			sb.Append(stats[0].newBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[1].newBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[2].newBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[3].newBooks.ToString().PadLeft(TAB_WIDTH," "[0]));			
+			return sb.ToString();			
+		}
+		private static string getLikedBooksLine(Stats[] stats) {
+			var sb = new StringBuilder();
+			sb.Append(stats[0].likedBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[1].likedBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[2].likedBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[3].likedBooks.ToString().PadLeft(TAB_WIDTH," "[0]));			
+			return sb.ToString();				
+		}
+		private static string getAverageRatingLine(Stats[] stats) {
+			var sb = new StringBuilder();
+			sb.Append(string.Format("{0:##.00}",(double)stats[0].cumulativeRating / stats[0].bookCount).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[1].cumulativeRating / stats[1].bookCount).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[2].cumulativeRating / stats[2].bookCount).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[3].cumulativeRating / stats[3].bookCount).PadLeft(TAB_WIDTH," "[0]));
+			return sb.ToString();			
+		}
+		private static string getAverageVolumeLine(Stats[] stats) {
+			var sb = new StringBuilder();
+			sb.Append(string.Format("{0:##.00}",(double)stats[0].pagesCount / stats[0].bookCount).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[1].pagesCount / stats[1].bookCount).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[2].pagesCount / stats[2].bookCount).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[3].pagesCount / stats[3].bookCount).PadLeft(TAB_WIDTH," "[0]));
+			return sb.ToString();				
+		}
+		private static string getTotalPagesLine(Stats[] stats) { 
+			var sb = new StringBuilder();
+			sb.Append(stats[0].pagesCount.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[1].pagesCount.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[2].pagesCount.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[3].pagesCount.ToString().PadLeft(TAB_WIDTH," "[0]));			
+			return sb.ToString();						
+		}
+		private static string getBooksPerMonthLine(Stats[] stats) { 
+			var sb = new StringBuilder();
+			sb.Append(string.Format("{0:##.00}",(double)stats[0].bookCount / stats[0].months).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[1].bookCount / stats[1].months).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[2].bookCount / stats[2].months).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[3].bookCount / stats[3].months).PadLeft(TAB_WIDTH," "[0]));
+			return sb.ToString();
+		}
+		private static string getPagesPerMonthLine(Stats[] stats) { 
+			var sb = new StringBuilder();
+			sb.Append(string.Format("{0:##.00}",(double)stats[0].pagesCount / stats[0].months).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[1].pagesCount / stats[1].months).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[2].pagesCount / stats[2].months).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[3].pagesCount / stats[3].months).PadLeft(TAB_WIDTH," "[0]));
+			return sb.ToString();			
+		}
+		private static string getPagesPerHourLine(Stats[] stats) {
+			var sb = new StringBuilder();
+			sb.Append(string.Format("{0:##.00}",(double)stats[0].pagesCount / stats[0].secondsReading * 3600).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[1].pagesCount / stats[1].secondsReading * 3600).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[2].pagesCount / stats[2].secondsReading * 3600).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[3].pagesCount / stats[3].secondsReading * 3600).PadLeft(TAB_WIDTH," "[0]));
+			return sb.ToString();	
+		}
+		private static string getMinutesPerBookLine(Stats[] stats) { 
+			var sb = new StringBuilder();
+			sb.Append(string.Format("{0:##.00}",(double)stats[0].secondsReading / 60 / stats[0].bookCount).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[1].secondsReading / 60 / stats[1].bookCount).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[2].secondsReading / 60 / stats[2].bookCount).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[3].secondsReading / 60 / stats[3].bookCount).PadLeft(TAB_WIDTH," "[0]));
+			return sb.ToString();	
+		}
+		
+		public static void showStatisticsTable(Stats[] stats) {
 
+			showStatisticsHeader();
+			var sb = new StringBuilder();
+			
+			ColoredConsoleWrite(ConsoleColor.DarkGray, getStatHeaderLine(stats) + Environment.NewLine);
+
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Время:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getSecondsReadingLine(stats) + Environment.NewLine);
+			
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Произведений:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getBookCountLine(stats) + Environment.NewLine);
+			
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Новых:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getNewBooksLine(stats) + Environment.NewLine);
+
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Понравилось:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getLikedBooksLine(stats) + Environment.NewLine);
+
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Ср. рейтинг:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getAverageRatingLine(stats) + Environment.NewLine);
+			
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Ср. объем:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getAverageVolumeLine(stats) + Environment.NewLine);
+
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Страниц всего:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getTotalPagesLine(stats) + Environment.NewLine);
+
+			Console.WriteLine();
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Темп чтения:".PadRight(FIRST_COL_WIDTH," "[0]));
+			Console.WriteLine();
+			
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Книг в месяц:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getBooksPerMonthLine(stats) + Environment.NewLine);
+
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Страниц в месяц:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getPagesPerMonthLine(stats) + Environment.NewLine);
+
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Страниц в час:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getPagesPerHourLine(stats) + Environment.NewLine);
+
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Минут на книгу:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getMinutesPerBookLine(stats) + Environment.NewLine);			
+		}
+		
 		public static void showStatisticsHeader() {
 			Console.Clear();
 
