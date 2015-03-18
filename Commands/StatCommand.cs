@@ -25,6 +25,7 @@ namespace book2read.Commands {
 				return true;
 			}
 			
+			DomainLogic.getReadingTimeReport();
 			DomainLogic.getReadingStats();
 			return true;
 		}

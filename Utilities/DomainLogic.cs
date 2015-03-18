@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 
 
 namespace book2read.Utilities {
@@ -154,6 +155,15 @@ namespace book2read.Utilities {
 		
 		private static int MonthDiff(DateTime startDate, DateTime endDate) {
 			return (endDate.Month + endDate.Year * 12) - (startDate.Month + startDate.Year * 12);
+		}
+
+		public static void getReadingTimeReport() {
+			string[] report = FileSystemService.Instance.getReadingTimeFile();
+			string startDate = "";
+			startDate = report.Length == 0 ? "2014-12-01" : report[0].Split("\t".ToCharArray())[0];
+			string[] json = FileSystemService.Instance.getReportFromRescueTime(startDate);
+			//HACK: Move to FileSystemService
+			File.WriteAllLines(FileSystemService.Instance.ReportFile.FullName, json);
 		}
 	}
 }

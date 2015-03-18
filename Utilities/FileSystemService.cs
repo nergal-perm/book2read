@@ -12,11 +12,12 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Linq;
+using System.Configuration;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v2;
 using Google.Apis.Drive.v2.Data;
 using Google.Apis.Services;
-using EvernoteSDK;
+
 
 namespace book2read.Utilities {
 	/// <summary>
@@ -398,6 +399,36 @@ namespace book2read.Utilities {
 
 		public string[] getWholeReadingLog() {
 			return System.IO.File.ReadAllLines(_haveRead.FullName);
+		}
+
+		public string[] getReadingTimeFile() {
+			return System.IO.File.ReadAllLines(_report.FullName);
+		}
+
+		public string[] getReportFromRescueTime(string startDate) {
+			var sb = new StringBuilder();
+			sb.Append("https://www.rescuetime.com/anapi/data")
+				.Append("?key=")
+				.Append(ConfigurationManager.AppSettings.Get("RescueTimeAPI"))
+				.Append("&pv=interval&rs=month")
+				.Append("&rb=").Append(startDate)
+				.Append("&re=").Append(string.Format("{0}-{1}-{2}", DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day))
+				.Append("&rk=category&rt=reading&format=json");
+				
+			var result = new List<string>();
+			using (var webClient = new System.Net.WebClient()) {
+				
+				var json = webClient.DownloadString(sb.ToString());
+				// Now parse with JSON.Net
+				
+				dynamic dynObj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+				foreach (var row in dynObj.rows) {
+					if (((string)row[3]).Contains("zxreader")) {
+						result.Add(((string)row[0]).Substring(0,10) + "\t" + (string)row[1]);
+					    }
+				}
+			}
+			return result.ToArray();
 		}
 	}
 }
