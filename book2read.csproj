@@ -180,6 +180,7 @@
     <Compile Include="Commands\GetCommand.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\ReadCommand.cs" />
+    <Compile Include="Commands\ReportCommand.cs" />
     <Compile Include="Commands\StatCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
     <Compile Include="Program.cs" />

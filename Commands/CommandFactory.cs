@@ -48,6 +48,9 @@ namespace book2read.Commands {
 				case "EVERNOTE":
 					command = new EvernoteCommand(commandLine);
 					break;
+				case "REPORT":
+					command = new ReportCommand(commandLine);
+					break;
 				default:
 					command = new HelpCommand(commandLine);
 					break;
