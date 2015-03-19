@@ -23,7 +23,7 @@ namespace book2read.Utilities {
 		public int likedBooks;
 		public int cumulativeRating;
 		public DateTime startDate;
-		public int secondsReading;
+		public TimeSpan timeReading;
 	}
 	
 	public enum StatsPeriod {
@@ -57,10 +57,7 @@ namespace book2read.Utilities {
 		}
 
 		public static void getReadingStats() {
-			string[] readLog = FileSystemService.Instance.getWholeReadingLog();
-			CultureInfo provider = CultureInfo.InvariantCulture;					
-			
-			/* Собираем статистику по трем периодам:
+			/* Собираем статистику по четырем периодам:
 			 *  - текущий месяц
 			 *  - предыдущий месяц
 			 *  - с начала года
@@ -71,17 +68,29 @@ namespace book2read.Utilities {
 			var statsPrevMonth = new Stats();
 			var statsYTD = new Stats();
 			var statsTotal = new Stats();
+			
+			statsMonth.period=StatsPeriod.ThisMonth;
+			statsPrevMonth.period = StatsPeriod.PrevMonth;
+			statsYTD.period = StatsPeriod.YearToDate;
+			statsTotal.period = StatsPeriod.Total;
+			
+			string[] readLog = FileSystemService.Instance.getWholeReadingLog();
+			CultureInfo provider = CultureInfo.InvariantCulture;
 			var startDate = new DateTime(0L);
 			foreach (var line in readLog) {
 				var lineDate = DateTime.ParseExact(line.Substring(0, 8), "yyyyMMdd", provider);
-				if (startDate.Year == 0001) 
+				if (startDate.Year == 0001)
 					startDate = lineDate;
 				string[] splitLine = line.Split("[]".ToCharArray());
+				
+				// Пропускаем аудиокниги
+				if (splitLine[2].Contains("@")) { continue; }
+				
 				int linePages = int.Parse(splitLine[1].Split(":".ToCharArray())[0]);
 				int lineRating = int.Parse(splitLine[1].Split(":".ToCharArray())[1]);
 				bool isNew = !splitLine[2].Contains("^");
 				bool isLiked = splitLine[2].Contains("*");
-				if (splitLine[2].Contains("@")) { continue; }
+				
 				
 				// для общей статистики учитываем все строки
 				statsTotal.bookCount++;
@@ -100,7 +109,7 @@ namespace book2read.Utilities {
 						statsYTD.newBooks++;
 					if (isLiked)
 						statsYTD.likedBooks++;
-					statsYTD.cumulativeRating += lineRating;					
+					statsYTD.cumulativeRating += lineRating;
 					
 					// и если месяц == текущему, тогда еще и месяц заполняем
 					if (lineDate.Month == DateTime.Today.Month) {
@@ -110,61 +119,61 @@ namespace book2read.Utilities {
 							statsMonth.newBooks++;
 						if (isLiked)
 							statsMonth.likedBooks++;
-						statsMonth.cumulativeRating += lineRating;											
+						statsMonth.cumulativeRating += lineRating;
 					}
 				}
 				
 				// отбираем статистику для предыдущего месяца
 				statsPrevMonth.startDate = new DateTime(DateTime.Today.Year,DateTime.Today.Month,1).AddMonths(-1);
 				if (lineDate.Year == statsPrevMonth.startDate.Year && lineDate.Month == statsPrevMonth.startDate.Month) {
-						statsPrevMonth.bookCount++;
-						statsPrevMonth.pagesCount += linePages;
-						if (isNew)
-							statsPrevMonth.newBooks++;
-						if (isLiked)
-							statsPrevMonth.likedBooks++;
-						statsPrevMonth.cumulativeRating += lineRating;																
+					statsPrevMonth.bookCount++;
+					statsPrevMonth.pagesCount += linePages;
+					if (isNew)
+						statsPrevMonth.newBooks++;
+					if (isLiked)
+						statsPrevMonth.likedBooks++;
+					statsPrevMonth.cumulativeRating += lineRating;
 				}
 
-			}	
+			}
 			statsTotal.months = MonthDiff(startDate, DateTime.Today) + 1;
 			statsYTD.months = DateTime.Today.Month;
 			statsMonth.months = 1;
 			statsPrevMonth.months = 1;
 			
-			statsMonth.period=StatsPeriod.ThisMonth;
-			statsPrevMonth.period = StatsPeriod.PrevMonth;
-			statsYTD.period = StatsPeriod.YearToDate;
-			statsTotal.period = StatsPeriod.Total;
-
 			statsMonth.startDate = DateTime.Today;
 			statsYTD.startDate = new DateTime(DateTime.Today.Year,1,1);
 			statsTotal.startDate = startDate;
 			
-			statsMonth.secondsReading = 56659;
-			statsPrevMonth.secondsReading = 52058;
-			statsYTD.secondsReading = 43994 + 52058 + 56659;
-			statsTotal.secondsReading = statsYTD.secondsReading + 19076;
+			FileSystemService.Instance.updateReadingTimeReport();
 			
+			string[] readTimeLog = FileSystemService.Instance.getReadingTimeFile();
+			foreach (var line in readTimeLog) {
+				DateTime dt = DateTime.ParseExact(line.Split("\t".ToCharArray())[0],"yyyy-MM-dd", provider);
+				TimeSpan seconds = new TimeSpan(0,0, int.Parse(line.Split("\t".ToCharArray())[1]));
+				// для общей статистики учитываем все строки
+				statsTotal.timeReading += seconds;
+				if (dt.Year == DateTime.Today.Year) {
+					statsYTD.timeReading += seconds;
+					if (dt.Month == DateTime.Today.Month) {
+						statsMonth.timeReading += seconds;
+					}
+				}
+				if (dt == new DateTime(DateTime.Today.Year,DateTime.Today.Month,1).AddMonths(-1)) {
+					statsPrevMonth.timeReading += seconds;
+				}
+			}
+
 			UserInterface.showStatisticsTable(new [] {statsMonth, statsPrevMonth, statsYTD, statsTotal});
-			
 			UserInterface.confirmOperation("", "", "Нажмите Enter для продолжения...", ConsoleKey.Enter);
 			
 
 		}
-		
+
 		private static int MonthDiff(DateTime startDate, DateTime endDate) {
 			return (endDate.Month + endDate.Year * 12) - (startDate.Month + startDate.Year * 12);
 		}
-
-		public static void getReadingTimeReport() {
-			string[] report = FileSystemService.Instance.getReadingTimeFile();
-			string startDate = "";
-			startDate = report.Length == 0 ? "2014-12-01" : report[0].Split("\t".ToCharArray())[0];
-			string[] json = FileSystemService.Instance.getReportFromRescueTime(startDate);
-			//HACK: Move to FileSystemService
-			File.WriteAllLines(FileSystemService.Instance.ReportFile.FullName, json);
-		}
+		
 	}
 }
 

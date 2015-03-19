@@ -8,6 +8,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -119,7 +120,7 @@ namespace book2read.Utilities {
 
 		DirectoryInfo getDropboxFolder() {
 			var appDataPath = Environment.GetFolderPath(
-				                  Environment.SpecialFolder.ApplicationData);
+				Environment.SpecialFolder.ApplicationData);
 			var dbPath = Path.Combine(appDataPath, "Dropbox\\host.db");
 
 			if (!System.IO.File.Exists(dbPath))
@@ -145,26 +146,26 @@ namespace book2read.Utilities {
 			_haveRead = new FileInfo(_bookDbPath.FullName + "HaveRead.txt");
 			if (!_haveRead.Exists) {
 				_haveRead.Create().Close();
-			} 
+			}
 			_report = new FileInfo(_bookDbPath.FullName + "Report.txt");
 			if (!_report.Exists) {
 				_report.Create().Close();
-			} 
+			}
 			
 			_toReadLocal = new FileInfo(_bookDbPath.FullName + "ToReadLocal.txt");
 			if (!_toReadLocal.Exists) {
 				_toReadLocal.Create().Close();
-			} 
+			}
 
 			_toReadWeb = new FileInfo(_bookDbPath.FullName + "ToReadWeb.txt");
 			if (!_toReadWeb.Exists) {
 				_toReadWeb.Create().Close();
-			} 
+			}
 			
 			_haveReadWebIds = new FileInfo(_bookDbPath.FullName + "WebIds.txt");
 			if (!_haveReadWebIds.Exists) {
 				_haveReadWebIds.Create().Close();
-			} 			
+			}
 		}
 		
 		
@@ -177,7 +178,7 @@ namespace book2read.Utilities {
 			var certificate = new X509Certificate2(@"key.p12", "notasecret", X509KeyStorageFlags.Exportable);
 
 			var credential = new ServiceAccountCredential(
-				                 new ServiceAccountCredential.Initializer(serviceAccountEmail) {
+				new ServiceAccountCredential.Initializer(serviceAccountEmail) {
 					Scopes = new[] {
 						DriveService.Scope.Drive,
 						DriveService.Scope.DriveFile,
@@ -188,9 +189,9 @@ namespace book2read.Utilities {
 
 			// Create the service.
 			_webService = new DriveService(new BaseClientService.Initializer() {
-				HttpClientInitializer = credential,
-				ApplicationName = "Web Library Crawler",
-			});
+			                               	HttpClientInitializer = credential,
+			                               	ApplicationName = "Web Library Crawler",
+			                               });
 
 			Console.Clear();
 		}
@@ -254,7 +255,7 @@ namespace book2read.Utilities {
 					request.PageToken = null;
 					_isWebLibraryAvailable = false;
 				}
-			} while (!String.IsNullOrEmpty(request.PageToken));		
+			} while (!String.IsNullOrEmpty(request.PageToken));
 
 			return result;
 		}
@@ -270,9 +271,9 @@ namespace book2read.Utilities {
 			var ids = System.IO.File.ReadAllLines(_haveReadWebIds.FullName).ToList();
 			foreach (var file in result) {
 				if (!ids.Contains(file.Id) && (file.Title.ToUpper().Contains(".PDF") || file.Title.ToUpper().Contains(".ZIP") ||
-				    file.Title.ToUpper().Contains(".RAR") || file.Title.ToUpper().Contains(".FB2") ||
-				    file.Title.ToUpper().Contains(".DJV") || file.Title.ToUpper().Contains(".DOC") ||
-				    file.Title.ToUpper().Contains(".TXT"))) {
+				                               file.Title.ToUpper().Contains(".RAR") || file.Title.ToUpper().Contains(".FB2") ||
+				                               file.Title.ToUpper().Contains(".DJV") || file.Title.ToUpper().Contains(".DOC") ||
+				                               file.Title.ToUpper().Contains(".TXT"))) {
 					files.Add(file);
 				}
 				UserInterface.ShowPercentProgress("Обновляю библиотеку...", i, result.Count);
@@ -323,10 +324,12 @@ namespace book2read.Utilities {
 		/// </summary>
 		/// <param name="curFile">Файл для удаления</param>
 		public void removeFromLibrary(FileInfo curFile) {
-			if (!isLibraryFound()) { return; }
+			if (!isLibraryFound()) {
+				return;
+			}
 			foreach (var file in _libraryPath.GetFiles(curFile.Name, SearchOption.AllDirectories)) {
 				file.Delete();
-			}			
+			}
 		}
 		
 		/// <summary>
@@ -334,7 +337,7 @@ namespace book2read.Utilities {
 		/// </summary>
 		/// <param name="curFile">Файл для удаления</param>
 		public void removeFromQueue(FileInfo curFile) {
-			curFile.Delete();			
+			curFile.Delete();
 		}
 
 		/// <summary>
@@ -353,8 +356,8 @@ namespace book2read.Utilities {
 			var result = System.IO.File.ReadAllLines(_toReadWeb.FullName).FirstOrDefault(s => s.Contains(file.Name));
 			if (result != null) {
 				var id = result.Split(":".ToCharArray())[0];
-				System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);				
-			}			
+				System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);
+			}
 		}
 		
 		/// <summary>
@@ -386,7 +389,7 @@ namespace book2read.Utilities {
 					var x = _service.HttpClient.GetByteArrayAsync(_fileResource.DownloadUrl);
 					byte[] arrBytes = x.Result;
 					System.IO.File.WriteAllBytes(_saveTo, arrBytes);
-					return true;                  
+					return true;
 				} catch (Exception e) {
 					Console.WriteLine("An error occurred: " + e.Message);
 					return false;
@@ -412,23 +415,43 @@ namespace book2read.Utilities {
 				.Append(ConfigurationManager.AppSettings.Get("RescueTimeAPI"))
 				.Append("&pv=interval&rs=month")
 				.Append("&rb=").Append(startDate)
-				.Append("&re=").Append(string.Format("{0}-{1}-{2}", DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day))
+				.Append("&re=").Append(string.Format("{0:0000}-{1:00}-{2:00}", DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day))
 				.Append("&rk=category&rt=reading&format=json");
-				
+			
 			var result = new List<string>();
 			using (var webClient = new System.Net.WebClient()) {
 				
 				var json = webClient.DownloadString(sb.ToString());
-				// Now parse with JSON.Net
 				
 				dynamic dynObj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
 				foreach (var row in dynObj.rows) {
-					if (((string)row[3]).Contains("zxreader")) {
-						result.Add(((string)row[0]).Substring(0,10) + "\t" + (string)row[1]);
-					    }
+					if (((string)row[3]).Contains("zxreader"))
+						result.Add(string.Format("{0}-{1}-{2}\t{3}", ((string)row[0]).Substring(6, 4), ((string)row[0]).Substring(0, 2), ((string)row[0]).Substring(3, 2), (string)row[1]));
 				}
 			}
 			return result.ToArray();
 		}
+
+		public void updateReadingTimeReport() {
+			CultureInfo provider = CultureInfo.InvariantCulture;
+			var report = new List<string>(getReadingTimeFile());
+			string startDate = "";
+			startDate = report.Count == 0 ? "2014-12-01" : report[report.Count-1].Split("\t".ToCharArray())[0];
+			string[] jsonResult = FileSystemService.Instance.getReportFromRescueTime(startDate);
+			var jsonBDate = DateTime.ParseExact(jsonResult[0].Split("\t".ToCharArray())[0], "yyyy-MM-dd", provider);
+			for (int i=report.Count-1; i>=0; i--) {
+				if (DateTime.Parse(report[i].Split("\t".ToCharArray())[0], provider) >= jsonBDate)
+					report.RemoveAt(i);
+			}
+			report.AddRange(jsonResult);
+			System.IO.File.WriteAllLines(ReportFile.FullName, report);
+		}
+
+		public void updateStats(Stats[] stats) {
+			
+
+		}
+		
+
 	}
 }
