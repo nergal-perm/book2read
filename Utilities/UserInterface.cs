@@ -110,9 +110,9 @@ namespace book2read.Utilities {
 			bookInfo.file = FileSystemService.Instance.getBookFromQueue(_bookIndex);
 			Console.WriteLine("Выбран файл: " + bookInfo.file.Name);
 			Console.Write("Введите название книги: ");
-			string title = ToTitleCase(Console.ReadLine());
+			string title = Console.ReadLine();
 			Console.Write("Введите автора книги: ");
-			string author = ToTitleCase(Console.ReadLine());
+			string author = Console.ReadLine();
 			Console.Write("Введите количество страниц: ");
 			int pageCount;
 			int.TryParse(Console.ReadLine(), out pageCount);
