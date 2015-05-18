@@ -57,6 +57,9 @@ namespace book2read.Utilities {
 		FileInfo _toReadWeb;
 		public FileInfo ToReadWebFile { get { return _toReadWeb; } }
 		
+		FileInfo _toReadFlibusta;
+		public FileInfo ToReadFlibusta { get { return _toReadFlibusta; } }
+		
 		FileInfo _report;
 		public FileInfo ReportFile { get { return _report; } }
 		
@@ -88,14 +91,19 @@ namespace book2read.Utilities {
 		}
 		
 		public long getBookCount() {
-			return LocalBoksCount + WebBooksCount;
+			return LocalBoksCount + WebBooksCount + FlibustaBooksCount;
 		}
 		
 		public int LocalBoksCount { get { return System.IO.File.ReadLines(_toReadLocal.FullName).Count(); } }
 		public int WebBooksCount { get { return System.IO.File.ReadLines(_toReadWeb.FullName).Count(); } }
+		public int FlibustaBooksCount { get { return System.IO.File.ReadLines(_toReadFlibusta.FullName).Count(); } }
 		
 		public bool isWebLibraryAvailable() {
 			return _isWebLibraryAvailable;
+		}
+		
+		public bool isFlibustaCatalogFound() {
+			return new FileInfo(_bookDbPath + "catalog.txt").Exists;
 		}
 		
 		void findPaths() {
@@ -156,7 +164,12 @@ namespace book2read.Utilities {
 			if (!_toReadLocal.Exists) {
 				_toReadLocal.Create().Close();
 			}
-
+			
+			_toReadFlibusta = new FileInfo(_bookDbPath.FullName + "ToReadFlibusta.txt");
+			if (!_toReadFlibusta.Exists) {
+				_toReadFlibusta.Create().Close();
+			}
+			
 			_toReadWeb = new FileInfo(_bookDbPath.FullName + "ToReadWeb.txt");
 			if (!_toReadWeb.Exists) {
 				_toReadWeb.Create().Close();
@@ -207,11 +220,36 @@ namespace book2read.Utilities {
 			if (!isWebLibraryAvailable()) {
 				Console.WriteLine("Сетевая библиотека недоступна, список книг в облаке не будет обновлен.");
 			} else {
-				updateWebLibrary();
+				//updateWebLibrary();
 			}
-			UserInterface.confirmUpdateOperation(DateTime.Now - timeStart);
+			
+			if (!isFlibustaCatalogFound()) {
+				Console.WriteLine("Каталог Флибусты не найден, список книг Флибусты не будет обновлен.");
+			} else {
+				updateFlibustaLibrary();
+			}
+			Console.ReadLine();
 		}
 
+		
+		void updateFlibustaLibrary() {
+			var ids = System.IO.File.ReadAllLines(_haveReadWebIds.FullName).ToList();
+			var books = System.IO.File.ReadAllLines(_bookDbPath + "catalog.txt").ToList();
+			var files = new List<string>();
+			int i = 0;
+			foreach (string bookDetails in books) {
+				var bdSplit = bookDetails.Replace("&quot;", "\"").Replace("&amp;", "&").Split(";".ToCharArray());
+				var id = bdSplit[bdSplit.Length - 1];
+				var lang = bdSplit[bdSplit.Length - 4];
+				if (lang.ToUpperInvariant()=="RU" && !ids.Contains(id)) {
+					files.Add(bookDetails);
+				}
+				UserInterface.ShowPercentProgress("Обрабатываю каталог Flibusta...", i, books.Count);
+				i++;
+			}
+			System.IO.File.WriteAllLines(_toReadFlibusta.FullName, files.ToArray(), Encoding.UTF8);
+		}
+		
 		void updateLocalLibrary() {
 			Console.Write("Получаю список файлов локальной библиотеки... ");
 			var allFiles = _libraryPath.GetFiles("*.*", SearchOption.AllDirectories).ToList(); //.Select(p => p.Name).ToArray();
@@ -380,7 +418,25 @@ namespace book2read.Utilities {
 			Google.Apis.Drive.v2.Data.File file = _webService.Files.Get(fileId).Execute();
 			downloadFile(_webService, file, _toReadPath + file.Title);
 		}
-		
+
+		public void getBookFromFlibusta(int element) {
+			string[] bookDetails = System.IO.File.ReadLines(_toReadFlibusta.FullName).Skip(element).First().Split(";".ToCharArray());
+			string author = (bookDetails[0] + " " + bookDetails[1] + " " + bookDetails[2]).Trim(" ".ToCharArray());
+			string id = bookDetails[bookDetails.Length - 1];
+			
+			var sb = new StringBuilder();
+			for (int i = 3; i < bookDetails.Length - 4; i++) {
+				if (bookDetails[i].Length != 0) {
+					sb.Append(bookDetails[i]).Append(";");
+				}
+			}
+			var title = sb.ToString().Trim("; ".ToCharArray());
+			var newFileName = (id + " - " + author + " - " + title + ".stub");
+			foreach (char c in Path.GetInvalidFileNameChars()) {
+				newFileName = newFileName.Replace(c, "%"[0]);
+			}
+			new FileInfo(_toReadPath + newFileName).Create().Close();
+		}
 		
 		public static Boolean downloadFile(DriveService _service, Google.Apis.Drive.v2.Data.File _fileResource, string _saveTo) {
 

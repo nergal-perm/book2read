@@ -233,10 +233,10 @@ namespace book2read.Utilities {
 		}
 		private static string getSecondsReadingLine(Stats[] stats) {
 			var sb = new StringBuilder();
-			sb.Append(string.Format("{0:###}ч {1:00}м", stats[0].timeReading.TotalHours, stats[0].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:###}ч {1:00}м", stats[1].timeReading.TotalHours, stats[1].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:###}ч {1:00}м", stats[2].timeReading.TotalHours, stats[2].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:###}ч {1:00}м", stats[3].timeReading.TotalHours, stats[3].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]));			
+			sb.Append(string.Format("{0:##0}:{1:00}", Math.Floor(stats[0].timeReading.TotalSeconds / 3600), stats[0].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##0}:{1:00}", Math.Floor(stats[1].timeReading.TotalSeconds / 3600), stats[1].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##0}:{1:00}", Math.Floor(stats[2].timeReading.TotalSeconds / 3600), stats[2].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##0}:{1:00}", Math.Floor(stats[3].timeReading.TotalSeconds / 3600), stats[3].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();
 		}
 		private static string getBookCountLine(Stats[] stats) {
@@ -305,10 +305,10 @@ namespace book2read.Utilities {
 		}
 		private static string getPagesPerHourLine(Stats[] stats) {
 			var sb = new StringBuilder();
-			sb.Append(string.Format("{0:##.00}",(double)stats[0].pagesCount / stats[0].timeReading.TotalHours).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.00}",(double)stats[1].pagesCount / stats[1].timeReading.TotalHours).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.00}",(double)stats[2].pagesCount / stats[2].timeReading.TotalHours).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.00}",(double)stats[3].pagesCount / stats[3].timeReading.TotalHours).PadLeft(TAB_WIDTH," "[0]));
+			sb.Append(string.Format("{0:##.00}",(double)stats[0].pagesCount / stats[0].timeReading.TotalSeconds * 3600).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[1].pagesCount / stats[1].timeReading.TotalSeconds * 3600).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[2].pagesCount / stats[2].timeReading.TotalSeconds * 3600).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[3].pagesCount / stats[3].timeReading.TotalSeconds * 3600).PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();	
 		}
 		private static string getMinutesPerBookLine(Stats[] stats) { 

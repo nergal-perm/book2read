@@ -38,13 +38,6 @@ namespace book2read.Commands {
 				case "STATS":
 					command = new StatCommand(commandLine);
 					break;
-				case "SELECT":
-					//TODO: Организовать выборку
-					/* Например, выбрать все понравившиеся книги, чтобы выбрать из них
-					 * какую-нибудь и перечитать ее. Или выбрать книги по авторам. Или 
-					 * выбрать книги, содержащие какое-нибудь слово в названии.
-					 */
-					break;
 				case "EVERNOTE":
 					command = new EvernoteCommand(commandLine);
 					break;

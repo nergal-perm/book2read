@@ -25,18 +25,21 @@ namespace book2read.Commands {
 			int.TryParse(_commandLine[1], out _bookIndex);
 			int local = _fs.isLibraryFound() ? _fs.LocalBoksCount : 0;
 			int web = _fs.isWebLibraryAvailable() ? _fs.WebBooksCount : 0;
+			int flibusta = _fs.FlibustaBooksCount;
 		
 			if (local + web == 0) {
 				return true;
 			}
 			
-			var bookNums = getRandomSequence(_bookIndex, local + web);
+			var bookNums = getRandomSequence(_bookIndex, local + web + flibusta);
 			
 			foreach (var element in bookNums) {
 				if (element < local) {
 					_fs.getBookFromLocalLibrary(element);
-				} else {
+				} else if (element < local + web) {
 					_fs.getBookFromOnlineLibrary(element - local);
+				} else {
+					_fs.getBookFromFlibusta(element - local - web);
 				}
 			}			
 			
