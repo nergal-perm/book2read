@@ -391,10 +391,23 @@ namespace book2read.Utilities {
 		public void appendIdToWebIds(FileInfo file) {
 			// если файл был получен из облачной библиотеки, сохраним его ID в список ID прочитанных книг,
 			// чтобы не предлагать его к прочтению в будущем
+			
+			// Для облачной библиотеки Славки Уткина
 			var result = System.IO.File.ReadAllLines(_toReadWeb.FullName).FirstOrDefault(s => s.Contains(file.Name));
 			if (result != null) {
 				var id = result.Split(":".ToCharArray())[0];
 				System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);
+			}
+			
+			// Для библиотеки Флибусты
+			try {
+				var id = file.Name.Split(".".ToCharArray())[1];
+				result = System.IO.File.ReadAllLines(_toReadFlibusta.FullName).FirstOrDefault(s => s.EndsWith(";"+id));
+				if(result != null) {
+					System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);
+				}				
+			} catch (Exception e) {
+				// Do nothing
 			}
 		}
 		
