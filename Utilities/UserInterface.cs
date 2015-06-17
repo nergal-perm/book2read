@@ -222,7 +222,7 @@ namespace book2read.Utilities {
 			confirmOperation("", "", "Нажмите Enter для продолжения...", ConsoleKey.Enter);
 		}
 
-		private static string getStatHeaderLine(System.Collections.Generic.IReadOnlyList<Stats> stats) {
+		private static string getStatHeaderLine(System.Collections.Generic.IList<Stats> stats) {
 			var sb = new StringBuilder();
 			sb.Append("\t\t")
 				.Append(string.Format("{0:MMMMM}",stats[0].startDate).PadLeft(TAB_WIDTH," "[0]))
