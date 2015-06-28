@@ -183,6 +183,7 @@
     <Compile Include="Commands\ReadCommand.cs" />
     <Compile Include="Commands\StatCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
+    <Compile Include="LibraryHandlers\ILibraryHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\DomainLogic.cs" />
@@ -200,6 +201,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Commands" />
+    <Folder Include="LibraryHandlers" />
+    <Folder Include="UnitTests" />
     <Folder Include="Utilities" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -228,7 +228,6 @@ namespace book2read.Utilities {
 			} else {
 				updateFlibustaLibrary();
 			}
-			Console.ReadLine();
 		}
 
 		
@@ -354,7 +353,11 @@ namespace book2read.Utilities {
 		public void archiveBook(BookMetaData bookInfo) {
 			var gdPath = Environment.GetFolderPath(
 				Environment.SpecialFolder.UserProfile) + @"\Google Диск\Book Archive\";
-			System.IO.File.Copy(bookInfo.file.FullName, gdPath + bookInfo.dbRow.Split("[".ToCharArray())[0].Trim(" ".ToCharArray()) + bookInfo.file.Extension);
+			var gdFileName = bookInfo.dbRow.Split("[".ToCharArray())[0].Trim(" ".ToCharArray());
+			foreach (char c in Path.GetInvalidFileNameChars()) {
+				gdFileName = gdFileName.Replace(c, "."[0]);
+			}
+			System.IO.File.Copy(bookInfo.file.FullName, gdPath + gdFileName + bookInfo.file.Extension);
 		}
 
 		/// <summary>
