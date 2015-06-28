@@ -185,3 +185,5 @@ FakesAssemblies/
 
 # Sensitive config data
 app.config
+app.config
+*.config
