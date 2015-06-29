@@ -183,11 +183,17 @@
     <Compile Include="Commands\ReadCommand.cs" />
     <Compile Include="Commands\StatCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
+    <Compile Include="LibraryHandlers\FlibustaLibrary.cs" />
     <Compile Include="LibraryHandlers\ILibraryHandler.cs" />
+    <Compile Include="Model\BookInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitTests\FakeFSWrapper.cs" />
+    <Compile Include="UnitTests\FlibustaLibraryTest.cs" />
     <Compile Include="Utilities\DomainLogic.cs" />
     <Compile Include="Utilities\FileComparer.cs" />
+    <Compile Include="Utilities\FSWrapper.cs" />
+    <Compile Include="Utilities\IFileSystemWrapper.cs" />
     <Compile Include="Utilities\UserInterface.cs" />
     <Compile Include="Utilities\FileSystemService.cs" />
   </ItemGroup>
@@ -202,6 +208,8 @@
   <ItemGroup>
     <Folder Include="Commands" />
     <Folder Include="LibraryHandlers" />
+    <Folder Include="Model" />
+    <Folder Include="UnitTests" />
     <Folder Include="UnitTests" />
     <Folder Include="Utilities" />
   </ItemGroup>

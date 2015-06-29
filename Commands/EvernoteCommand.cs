@@ -46,7 +46,7 @@ namespace book2read.Commands {
 				Console.WriteLine(e.Message);
 			}
 			
-			List<ENSessionFindNotesResult> myNotesList = ENSession.SharedSession.FindNotes(ENNoteSearch.NoteSearch(""), 
+			List<ENSessionFindNotesResult> myNotesList = ENSession.SharedSession.FindNotes(ENNoteSearch.NoteSearch("tag:книга tag:"), 
 				                                             null, ENSession.SearchScope.All, 
 				                                             ENSession.SortOrder.RecentlyUpdated, 20);
 

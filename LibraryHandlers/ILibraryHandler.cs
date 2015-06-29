@@ -8,6 +8,8 @@
  */
 using System;
 
+using book2read.Model;
+
 namespace book2read.LibraryHandlers
 {
 	/// <summary>
@@ -15,10 +17,13 @@ namespace book2read.LibraryHandlers
 	/// </summary>
 	public interface ILibraryHandler {
 		int getDaysAfterLastUpdate();
-		void updateLibrary();
 		int getBookCount();
+		bool isAvailable();
+		
+		void updateLibrary();
 		BookInfo[] getRandomBooks(int quantity);
 		void deleteFromLibrary(BookInfo bookToDelete);
 		void markAsRead(BookInfo readBook);
+		
 	}
 }

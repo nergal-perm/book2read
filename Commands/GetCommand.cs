@@ -27,7 +27,7 @@ namespace book2read.Commands {
 			int web = _fs.isWebLibraryAvailable() ? _fs.WebBooksCount : 0;
 			int flibusta = _fs.FlibustaBooksCount;
 		
-			if (local + web == 0) {
+			if (local + web + flibusta == 0) {
 				return true;
 			}
 			
