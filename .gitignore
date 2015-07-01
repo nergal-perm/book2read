@@ -187,3 +187,4 @@ FakesAssemblies/
 app.config
 app.config
 *.config
+*.config
