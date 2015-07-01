@@ -150,6 +150,7 @@
     </Reference>
     <Reference Include="System.Net.Http.Primitives">
       <HintPath>packages\Microsoft.Net.Http.2.2.22\lib\net40\System.Net.Http.Primitives.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="System.Net.Http.WebRequest">
       <HintPath>packages\Microsoft.Net.Http.2.2.22\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
