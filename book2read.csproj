@@ -170,6 +170,7 @@
     </Reference>
     <Reference Include="Zlib.Portable">
       <HintPath>packages\Zlib.Portable.1.10.0\lib\portable-net4+sl5+wp8+win8+wpa81+MonoTouch+MonoAndroid\Zlib.Portable.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -195,6 +196,7 @@
     <Compile Include="Utilities\FileComparer.cs" />
     <Compile Include="Utilities\FSWrapper.cs" />
     <Compile Include="Utilities\IFileSystemWrapper.cs" />
+    <Compile Include="Utilities\TempFile.cs" />
     <Compile Include="Utilities\UserInterface.cs" />
     <Compile Include="Utilities\FileSystemService.cs" />
   </ItemGroup>

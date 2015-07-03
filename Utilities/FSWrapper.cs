@@ -7,6 +7,8 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.IO;
+using System.Linq;
 
 namespace book2read.Utilities
 {
@@ -14,16 +16,25 @@ namespace book2read.Utilities
 	/// Description of FSWrapper.
 	/// </summary>
 	public class FSWrapper : IFileSystemWrapper {
-		public FSWrapper() {
-			
+		FileInfo file;
+		
+		public FSWrapper(string filePath) {
+			file = new FileInfo(filePath);
 		}
+		
 		#region Реализация абстрактных членов
 		public override int getAge() {
-			throw new NotImplementedException();
+			if (!this.fileExists()) {
+				throw new FileNotFoundException("File " + file.FullName + " not found");	
+			} 
+			return (int)(DateTime.Today - file.LastWriteTime).TotalDays;
 		}
 		
 		public override int getLinesCount() {
-			throw new NotImplementedException();
+			if(!this.fileExists()) {
+				throw new FileNotFoundException("File " + file.FullName + " not found");
+			}
+			return System.IO.File.ReadLines(file.FullName).Count();
 		}
 		
 		public override void updateFile() {
@@ -31,7 +42,7 @@ namespace book2read.Utilities
 		}		
 		
 		public override bool fileExists() {
-			throw new NotImplementedException();
+			return file.Exists;
 		}
 		#endregion
 	}

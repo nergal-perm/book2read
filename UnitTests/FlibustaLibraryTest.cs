@@ -11,6 +11,7 @@ using System.IO;
 using NUnit.Framework;
 
 using book2read.LibraryHandlers;
+using book2read.Utilities;
 
 namespace book2read.UnitTests {
 	[TestFixture]
@@ -54,6 +55,14 @@ namespace book2read.UnitTests {
 			// После второго обновления должно стать 45+50=95 книг и возраст = 0 дней
 			Assert.AreEqual(95, target.getBookCount());
 			Assert.AreEqual(0, target.getDaysAfterLastUpdate());
+		}
+		
+		[Test]
+		public void realDownloading() {
+			FSWrapper fsw = new FSWrapper(@"D:\Temp\BookDb\catalog.txt");
+			FlibustaLibrary fl = new FlibustaLibrary(fsw);
+			
+			fl.updateLibrary();
 		}
 	}
 }
