@@ -14,7 +14,7 @@ namespace book2read.UnitTests
 	[TestFixture]
 	public class ProxifiedConnectionTest
 	{
-		[Test]
+		[Ignore]
 		public void TestMethod()
 		{
 			var target = new ProxifiedConnection();

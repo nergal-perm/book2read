@@ -19,38 +19,29 @@ namespace book2read.LibraryHandlers {
 	/// дисковые операции - нужен объект-обертка для FileSystem
 	/// </summary>
 	public class FlibustaLibrary : ILibraryHandler {
-		private IFileSystemWrapper _fsw;
+		private IFileSystemWrapper _fileSystem;
 		
 		public FlibustaLibrary(IFileSystemWrapper fsw) {
-			_fsw = fsw;
+			_fileSystem = fsw;
 		}
 
 		#region ILibraryHandler implementation
 
 		public int getDaysAfterLastUpdate() {
-			return _fsw.getAge();
+			return _fileSystem.getAge();
 		}
 
 		public int getBookCount() {
-			return _fsw.getLinesCount();
+			return _fileSystem.getLinesCount();
 		}
 		
 		public void updateLibrary() {
-			// TODO: Заменить реализацию на реальное скачивание и распаковку каталога
-			//_fsw.updateFile();
-			
-			using (var tmp = new TempFile()) {
-				Catalog.DownloadFromUrl(@"http://flibustahezeous3.onion/catalog/catalog.zip", tmp);
-				
-				/* Download catalog
-			 	* Unzip catalog
-			 	* Clean up catalog
-			 	*/
-			}  
+			_fileSystem.updateFile();
+
 		}
 
 		public bool isAvailable() {
-			return _fsw.fileExists();
+			return _fileSystem.fileExists();
 		}
 
 		public BookInfo[] getRandomBooks(int quantity) {
@@ -66,26 +57,5 @@ namespace book2read.LibraryHandlers {
 		}
 
 		#endregion
-	
-		static class Catalog {
-			public static void DownloadFromUrl(string url, TempFile tmp) {
-				using (WebClient webClient = new WebClient()) {
-					webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler((object sender, DownloadProgressChangedEventArgs e) => Console.WriteLine("Downloaded:" + e.ProgressPercentage.ToString()));
- 
-					webClient.DownloadFileCompleted += new System.ComponentModel.AsyncCompletedEventHandler(delegate(object sender, System.ComponentModel.AsyncCompletedEventArgs e) {
-					                                                                                        	if(e.Error != null) {
-					                                                                                        		Console.WriteLine(e.Error.Message);
-					                                                                                        	}
-					                                                                                        	
-					if (e.Error == null && !e.Cancelled) {
-							Console.WriteLine("Download completed!");
-							Console.WriteLine("File path: {0}", tmp.Path);
-							Console.ReadLine();
-						}
-					});
-					webClient.DownloadFileAsync(new Uri(url), tmp.Path);
-				}				
-			}
-		}
 	}
 }

@@ -30,7 +30,8 @@ namespace book2read.UnitTests {
 			request.Proxy = wp;
 			WebResponse response = request.GetResponse();
 			string contentDisposition = request.Address.AbsoluteUri;
-			if (!string.IsNullOrEmpty(contentDisposition)) {
+			string contentType = response.ContentType;
+			if (!string.IsNullOrEmpty(contentDisposition) && contentType.Contains("zip")) {
 				string lookFor = "/";
 				int index = contentDisposition.LastIndexOf(lookFor, StringComparison.CurrentCultureIgnoreCase);
 				if (index > 0)

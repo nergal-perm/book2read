@@ -15,10 +15,12 @@ namespace book2read.Utilities
 	/// <summary>
 	/// Description of FSWrapper.
 	/// </summary>
-	public class FSWrapper : IFileSystemWrapper {
-		FileInfo file;
+	public abstract class FSWrapper : IFileSystemWrapper {
+		protected readonly FileInfo file;
 		
-		public FSWrapper(string filePath) {
+		protected FSWrapper() {}
+		
+		protected FSWrapper(string filePath) {
 			file = new FileInfo(filePath);
 		}
 		
@@ -36,10 +38,6 @@ namespace book2read.Utilities
 			}
 			return System.IO.File.ReadLines(file.FullName).Count();
 		}
-		
-		public override void updateFile() {
-			throw new NotImplementedException();
-		}		
 		
 		public override bool fileExists() {
 			return file.Exists;

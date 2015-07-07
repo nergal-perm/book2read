@@ -59,7 +59,7 @@ namespace book2read.UnitTests {
 		
 		[Test]
 		public void realDownloading() {
-			FSWrapper fsw = new FSWrapper(@"D:\Temp\BookDb\catalog.txt");
+			FSWrapper fsw = new FlibustaCatalogWrapper(@"D:\Temp\BookDb\catalog.txt");
 			FlibustaLibrary fl = new FlibustaLibrary(fsw);
 			
 			fl.updateLibrary();

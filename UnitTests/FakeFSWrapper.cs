@@ -8,6 +8,7 @@
  */
 using System;
 
+using System.IO;
 using book2read.Utilities;
 
 namespace book2read.UnitTests
@@ -35,10 +36,16 @@ namespace book2read.UnitTests
 		
 		#region Реализация абстрактных членов
 		public override int getAge() {
+			if (!_fileExists) {
+				throw new FileNotFoundException("File not found");	
+			}
 			return _age;
 		}
 
 		public override int getLinesCount() {
+			if (!_fileExists) {
+				throw new FileNotFoundException("File not found");	
+			}
 			return _linesCount;
 		}
 

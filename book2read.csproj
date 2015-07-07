@@ -200,6 +200,9 @@
     </Compile>
     <Compile Include="Utilities\DomainLogic.cs" />
     <Compile Include="Utilities\FileComparer.cs" />
+    <Compile Include="Utilities\FlibustaCatalogWrapper.cs">
+      <DependentUpon>FSWrapper.cs</DependentUpon>
+    </Compile>
     <Compile Include="Utilities\FSWrapper.cs" />
     <Compile Include="Utilities\IFileSystemWrapper.cs" />
     <Compile Include="Utilities\TempFile.cs" />
