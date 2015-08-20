@@ -18,6 +18,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v2;
 using Google.Apis.Drive.v2.Data;
 using Google.Apis.Services;
+using book2read.UnitTests;
 
 
 namespace book2read.Utilities {
@@ -442,21 +443,15 @@ namespace book2read.Utilities {
 
 		public void getBookFromFlibusta(int element) {
 			string[] bookDetails = System.IO.File.ReadLines(_toReadFlibusta.FullName).Skip(element).First().Split(";".ToCharArray());
-			string author = (bookDetails[0] + " " + bookDetails[1] + " " + bookDetails[2]).Trim(" ".ToCharArray());
+			//string author = (bookDetails[0] + " " + bookDetails[1] + " " + bookDetails[2]).Trim(" ".ToCharArray());
 			string id = bookDetails[bookDetails.Length - 1];
 			
 			var sb = new StringBuilder();
-			for (int i = 3; i < bookDetails.Length - 4; i++) {
-				if (bookDetails[i].Length != 0) {
-					sb.Append(bookDetails[i]).Append(";");
-				}
-			}
-			var title = sb.ToString().Trim("; ".ToCharArray());
-			var newFileName = (id + " - " + author + " - " + title + ".stub");
-			foreach (char c in Path.GetInvalidFileNameChars()) {
-				newFileName = newFileName.Replace(c, "%"[0]);
-			}
-			new FileInfo(_toReadPath + newFileName).Create().Close();
+			sb.Append(@"http://flibustahezeous3.onion/b/").Append(id).Append(@"/fb2");
+			ProxifiedConnection pc = new ProxifiedConnection();
+			pc.DownloadFile(sb.ToString());
+
+	
 		}
 		
 		public static Boolean downloadFile(DriveService _service, Google.Apis.Drive.v2.Data.File _fileResource, string _saveTo) {

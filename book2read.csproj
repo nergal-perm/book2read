@@ -194,10 +194,6 @@
       <DependentUpon>FlibustaLibraryTest.cs</DependentUpon>
     </Compile>
     <Compile Include="UnitTests\FlibustaLibraryTest.cs" />
-    <Compile Include="UnitTests\ProxifiedConnection.cs" />
-    <Compile Include="UnitTests\ProxifiedConnectionTest.cs">
-      <DependentUpon>ProxifiedConnection.cs</DependentUpon>
-    </Compile>
     <Compile Include="Utilities\DomainLogic.cs" />
     <Compile Include="Utilities\FileComparer.cs" />
     <Compile Include="Utilities\FlibustaCatalogWrapper.cs">
@@ -205,6 +201,10 @@
     </Compile>
     <Compile Include="Utilities\FSWrapper.cs" />
     <Compile Include="Utilities\IFileSystemWrapper.cs" />
+    <Compile Include="Utilities\ProxifiedConnection.cs" />
+    <Compile Include="Utilities\ProxifiedConnectionTest.cs">
+      <DependentUpon>ProxifiedConnection.cs</DependentUpon>
+    </Compile>
     <Compile Include="Utilities\TempFile.cs" />
     <Compile Include="Utilities\UserInterface.cs" />
     <Compile Include="Utilities\FileSystemService.cs" />

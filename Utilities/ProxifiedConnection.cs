@@ -7,8 +7,8 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
-using System.IO;
 using System.Net;
+using book2read.Utilities;
 
 namespace book2read.UnitTests {
 	/// <summary>
@@ -38,9 +38,9 @@ namespace book2read.UnitTests {
 					fileName = contentDisposition.Substring(index+1);
 			}
 			if (fileName.Length > 0) {
-				client.DownloadFile(fileUrl, @"D:\Temp\" + fileName);
+				client.DownloadFile(fileUrl, FileSystemService.Instance.ToReadPath.FullName + fileName);
 			} else {
-				client.DownloadFile(fileUrl, @"D:\Temp\flibusta.fb2");
+				// Do nothing
 			}
 			
 			return true;
