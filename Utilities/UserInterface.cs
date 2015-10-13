@@ -247,6 +247,14 @@ namespace book2read.Utilities {
 				.Append(stats[3].bookCount.ToString().PadLeft(TAB_WIDTH," "[0]));			
 			return sb.ToString();			
 		}
+		private static string getAudioBookCountLine(Stats[] stats) {
+			var sb = new StringBuilder();
+			sb.Append(stats[0].audioBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[1].audioBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[2].audioBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[3].audioBooks.ToString().PadLeft(TAB_WIDTH," "[0]));			
+			return sb.ToString();						
+		}
 		private static string getNewBooksLine(Stats[] stats) {
 			var sb = new StringBuilder();
 			sb.Append(stats[0].newBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
@@ -330,8 +338,11 @@ namespace book2read.Utilities {
 			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Время:".PadRight(FIRST_COL_WIDTH," "[0]));
 			ColoredConsoleWrite(ConsoleColor.Cyan, getSecondsReadingLine(stats) + Environment.NewLine);
 			
-			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Произведений:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Прочитано:".PadRight(FIRST_COL_WIDTH," "[0]));
 			ColoredConsoleWrite(ConsoleColor.Cyan, getBookCountLine(stats) + Environment.NewLine);
+
+			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Прослушано:".PadRight(FIRST_COL_WIDTH," "[0]));
+			ColoredConsoleWrite(ConsoleColor.Cyan, getAudioBookCountLine(stats) + Environment.NewLine);
 			
 			ColoredConsoleWrite(ConsoleColor.DarkCyan, "Новых:".PadRight(FIRST_COL_WIDTH," "[0]));
 			ColoredConsoleWrite(ConsoleColor.Cyan, getNewBooksLine(stats) + Environment.NewLine);

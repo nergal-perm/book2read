@@ -21,6 +21,7 @@ namespace book2read.Utilities {
 		public int pagesCount;
 		public int newBooks;
 		public int likedBooks;
+		public int audioBooks;		
 		public int cumulativeRating;
 		public DateTime startDate;
 		public TimeSpan timeReading;
@@ -84,41 +85,54 @@ namespace book2read.Utilities {
 				string[] splitLine = line.Split("[]".ToCharArray());
 				
 				// Пропускаем аудиокниги
-				if (splitLine[2].Contains("@")) { continue; }
+				//if (splitLine[2].Contains("@")) { continue; }
 				
 				int linePages = int.Parse(splitLine[1].Split(":".ToCharArray())[0]);
 				int lineRating = int.Parse(splitLine[1].Split(":".ToCharArray())[1]);
 				bool isNew = !splitLine[2].Contains("^");
 				bool isLiked = splitLine[2].Contains("*");
+				bool isAudio = splitLine[2].Contains("@");
 				
 				
 				// для общей статистики учитываем все строки
-				statsTotal.bookCount++;
 				statsTotal.pagesCount += linePages;
 				if (isNew)
 					statsTotal.newBooks++;
 				if (isLiked)
 					statsTotal.likedBooks++;
+				if (isAudio) {
+					statsTotal.audioBooks++;
+				} else {
+					statsTotal.bookCount++;
+				}
 				statsTotal.cumulativeRating += lineRating;
 				
 				// отбираем строки этого года:
 				if (lineDate.Year == DateTime.Today.Year) {
-					statsYTD.bookCount++;
 					statsYTD.pagesCount += linePages;
 					if (isNew)
 						statsYTD.newBooks++;
 					if (isLiked)
 						statsYTD.likedBooks++;
+					if (isAudio) {
+						statsYTD.audioBooks++;					
+					} else {
+						statsYTD.bookCount++;
+					}
 					statsYTD.cumulativeRating += lineRating;
 					
 					// и если месяц == текущему, тогда еще и месяц заполняем
 					if (lineDate.Month == DateTime.Today.Month) {
-						statsMonth.bookCount++;
 						statsMonth.pagesCount += linePages;
 						if (isNew)
 							statsMonth.newBooks++;
 						if (isLiked)
 							statsMonth.likedBooks++;
+						if (isAudio) {
+							statsMonth.audioBooks++;
+						} else {
+							statsMonth.bookCount++;
+						}
 						statsMonth.cumulativeRating += lineRating;
 					}
 				}
@@ -126,12 +140,16 @@ namespace book2read.Utilities {
 				// отбираем статистику для предыдущего месяца
 				statsPrevMonth.startDate = new DateTime(DateTime.Today.Year,DateTime.Today.Month,1).AddMonths(-1);
 				if (lineDate.Year == statsPrevMonth.startDate.Year && lineDate.Month == statsPrevMonth.startDate.Month) {
-					statsPrevMonth.bookCount++;
 					statsPrevMonth.pagesCount += linePages;
 					if (isNew)
 						statsPrevMonth.newBooks++;
 					if (isLiked)
 						statsPrevMonth.likedBooks++;
+					if (isAudio) {
+						statsPrevMonth.audioBooks++;
+					} else {
+						statsPrevMonth.bookCount++;
+					}
 					statsPrevMonth.cumulativeRating += lineRating;
 				}
 
