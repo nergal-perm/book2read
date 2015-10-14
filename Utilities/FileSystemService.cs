@@ -394,30 +394,36 @@ namespace book2read.Utilities {
 		/// <param name="bookInfo">Структура: строка для записи в дневник и ссылка на файл книги</param>
 		public void appendBookInfoToReadLog(BookMetaData bookInfo) {
 			System.IO.File.AppendAllText(_haveRead.FullName, bookInfo.dbRow + Environment.NewLine);
-			appendIdToWebIds(bookInfo.file);
+			appendIdToWebIds(bookInfo);
 		}
 		
-		public void appendIdToWebIds(FileInfo file) {
+		public void appendIdToWebIds(BookMetaData bookInfo) {
 			// если файл был получен из облачной библиотеки, сохраним его ID в список ID прочитанных книг,
 			// чтобы не предлагать его к прочтению в будущем
-			
-			// Для облачной библиотеки Славки Уткина
-			var result = System.IO.File.ReadAllLines(_toReadWeb.FullName).FirstOrDefault(s => s.Contains(file.Name));
-			if (result != null) {
-				var id = result.Split(":".ToCharArray())[0];
-				System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);
-			}
-			
-			// Для библиотеки Флибусты
-			try {
-				var id = file.Name.Split(".".ToCharArray())[1];
-				result = System.IO.File.ReadAllLines(_toReadFlibusta.FullName).FirstOrDefault(s => s.EndsWith(";"+id));
-				if(result != null) {
-					System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);
+			long id = -1;
+			if (bookInfo.file != null) {
+				// Для облачной библиотеки Славки Уткина
+				var result = System.IO.File.ReadAllLines(_toReadWeb.FullName).FirstOrDefault(s => s.Contains(bookInfo.file.Name));
+				if (result != null) {
+					id = long.Parse(result.Split(":".ToCharArray())[0]);
+				}
+				
+				// Для библиотеки Флибусты
+				try {
+					id = long.Parse(bookInfo.file.Name.Split(".".ToCharArray())[1]);
+					result = System.IO.File.ReadAllLines(_toReadFlibusta.FullName).FirstOrDefault(s => s.EndsWith(";"+id));
+					if(result != null) {
+						System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);
+					}				
+				} catch (Exception e) {
+					// Do nothing
 				}				
-			} catch (Exception e) {
-				// Do nothing
+			} else {
+				id = bookInfo.bookId;
 			}
+			
+			System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);
+
 		}
 		
 		/// <summary>

@@ -15,6 +15,7 @@ using book2read.Commands;
 
 namespace book2read.Utilities {
 	public struct BookMetaData {
+		public long bookId;
 		public string dbRow;
 		public FileInfo file;
 	}
@@ -105,17 +106,30 @@ namespace book2read.Utilities {
 		/// </summary>
 		/// <param name="_bookIndex">Номер книги в списке на чтение</param>
 		/// <returns>BookMetaData: строка для записи в дневник и ссылка на файл</returns>
-		public static BookMetaData getMetadataForFile(int _bookIndex) {
+		public static BookMetaData getMetadataForFile(int _bookIndex, int _bookId) {
 			var bookInfo = new BookMetaData();
-			bookInfo.file = FileSystemService.Instance.getBookFromQueue(_bookIndex);
-			Console.WriteLine("Выбран файл: " + bookInfo.file.Name);
-			Console.Write("Введите название книги: ");
-			string title = Console.ReadLine();
-			Console.Write("Введите автора книги: ");
-			string author = Console.ReadLine();
-			Console.Write("Введите количество страниц: ");
+			string title;
+			string author;
 			int pageCount;
-			int.TryParse(Console.ReadLine(), out pageCount);
+
+			if (_bookIndex > 0) {
+				bookInfo.file = FileSystemService.Instance.getBookFromQueue(_bookIndex);
+				Console.WriteLine("Выбран файл: " + bookInfo.file.Name);
+				Console.Write("Введите название книги: ");
+				title = Console.ReadLine();
+				Console.Write("Введите автора книги: ");
+				author = Console.ReadLine();
+				Console.Write("Введите количество страниц: ");
+				int.TryParse(Console.ReadLine(), out pageCount);
+			} else {
+				bookInfo.bookId = _bookId;
+				Console.Write("Введите название книги: ");
+				title = Console.ReadLine();
+				Console.Write("Введите автора книги: ");
+				author = Console.ReadLine();				
+				pageCount = 0;
+			}
+			
 			Console.Write("Введите рейтинг по 10-балльной шкале: ");
 			int rating;
 			int.TryParse(Console.ReadLine(), out rating);
@@ -273,10 +287,10 @@ namespace book2read.Utilities {
 		}
 		private static string getAverageRatingLine(Stats[] stats) {
 			var sb = new StringBuilder();
-			sb.Append(string.Format("{0:##.00}",(double)stats[0].cumulativeRating / stats[0].bookCount).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.00}",(double)stats[1].cumulativeRating / stats[1].bookCount).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.00}",(double)stats[2].cumulativeRating / stats[2].bookCount).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.00}",(double)stats[3].cumulativeRating / stats[3].bookCount).PadLeft(TAB_WIDTH," "[0]));
+			sb.Append(string.Format("{0:##.00}",(double)stats[0].cumulativeRating / (stats[0].bookCount + stats[0].audioBooks)).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[1].cumulativeRating / (stats[1].bookCount + stats[1].audioBooks)).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[2].cumulativeRating / (stats[2].bookCount + stats[2].audioBooks)).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[3].cumulativeRating / (stats[3].bookCount + + stats[3].audioBooks)).PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();			
 		}
 		private static string getAverageVolumeLine(Stats[] stats) {

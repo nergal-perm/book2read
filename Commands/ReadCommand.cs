@@ -23,7 +23,7 @@ namespace book2read.Commands {
 			if (!argsAreOk()) {
 				return true;
 			}
-			BookMetaData bookInfo = UserInterface.getMetadataForFile(_bookIndex);
+			BookMetaData bookInfo = UserInterface.getMetadataForFile(_bookIndex, _bookId);
 			
 			// Регистрация книги в качестве прочитанной осуществляется только
 			// после ввода дополнительной информации и подтверждения операции

@@ -25,14 +25,15 @@ namespace book2read.Commands {
 			if (!argsAreOk()) {
 				return true;
 			}
-			FileInfo curFile = _fs.getBookFromQueue(_bookIndex);
+			var bookInfo = new BookMetaData();
+			bookInfo.file = _fs.getBookFromQueue(_bookIndex);
 			
-			if (UserInterface.confirmDeleteFromQueueOperation(curFile.Name)) {
+			if (UserInterface.confirmDeleteFromQueueOperation(bookInfo.file.Name)) {
 				if (UserInterface.confirmDeleteFromLibraryOperation()) {
-					_fs.removeFromLibrary(curFile);
-					_fs.appendIdToWebIds(curFile);
+					_fs.removeFromLibrary(bookInfo.file);
+					_fs.appendIdToWebIds(bookInfo);
 				}
-				_fs.removeFromQueue(curFile);
+				_fs.removeFromQueue(bookInfo.file);
 			}
 			
 			return true;

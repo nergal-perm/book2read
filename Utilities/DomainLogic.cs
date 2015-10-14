@@ -49,12 +49,14 @@ namespace book2read.Utilities {
 			
 			fs.appendBookInfoToReadLog(bookInfo);
 
-			if (bookInfo.dbRow.Contains("*")) {
-				fs.archiveBook(bookInfo);
+			if (bookInfo.file != null) {
+				if (bookInfo.dbRow.Contains("*")) {
+					fs.archiveBook(bookInfo);
+				}
+	
+				fs.removeFromLibrary(bookInfo.file);
+				fs.removeFromQueue(bookInfo.file);				
 			}
-
-			fs.removeFromLibrary(bookInfo.file);
-			fs.removeFromQueue(bookInfo.file);
 		}
 
 		public static void getReadingStats() {
