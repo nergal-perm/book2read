@@ -18,7 +18,7 @@ namespace book2read.UnitTests
 		public void TestMethod()
 		{
 			var target = new ProxifiedConnection();
-			Assert.IsTrue(target.DownloadFile(@"http://flibustahezeous3.onion/b/165506/fb2"));
+			Assert.AreEqual(target.DownloadFile(165506), "hey");
 		}
 	}
 }

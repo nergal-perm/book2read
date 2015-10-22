@@ -356,14 +356,20 @@ namespace book2read.Utilities {
 			
 		}
 
-		public void archiveBook(BookMetaData bookInfo) {
+		public string archiveBook(BookMetaData bookInfo) {
 			var gdPath = Environment.GetFolderPath(
 				Environment.SpecialFolder.UserProfile) + @"\Google Диск\Book Archive\";
 			var gdFileName = bookInfo.dbRow.Split("[".ToCharArray())[0].Trim(" ".ToCharArray());
 			foreach (char c in Path.GetInvalidFileNameChars()) {
 				gdFileName = gdFileName.Replace(c, "."[0]);
 			}
+			if (bookInfo.file == null) {
+				var pc = new ProxifiedConnection();
+				bookInfo.file = new FileInfo(pc.DownloadFile(bookInfo.bookId));
+			}
+
 			System.IO.File.Copy(bookInfo.file.FullName, gdPath + gdFileName + bookInfo.file.Extension);
+			return bookInfo.file.FullName;
 		}
 
 		/// <summary>
@@ -402,16 +408,10 @@ namespace book2read.Utilities {
 			// чтобы не предлагать его к прочтению в будущем
 			long id = -1;
 			if (bookInfo.file != null) {
-				// Для облачной библиотеки Славки Уткина
-				var result = System.IO.File.ReadAllLines(_toReadWeb.FullName).FirstOrDefault(s => s.Contains(bookInfo.file.Name));
-				if (result != null) {
-					id = long.Parse(result.Split(":".ToCharArray())[0]);
-				}
-				
 				// Для библиотеки Флибусты
 				try {
 					id = long.Parse(bookInfo.file.Name.Split(".".ToCharArray())[1]);
-					result = System.IO.File.ReadAllLines(_toReadFlibusta.FullName).FirstOrDefault(s => s.EndsWith(";"+id));
+					var result = System.IO.File.ReadAllLines(_toReadFlibusta.FullName).FirstOrDefault(s => s.EndsWith(";"+id));
 					if(result != null) {
 						System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);
 					}				
@@ -420,9 +420,10 @@ namespace book2read.Utilities {
 				}				
 			} else {
 				id = bookInfo.bookId;
+				System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);
 			}
 			
-			System.IO.File.AppendAllText(_haveReadWebIds.FullName, id + Environment.NewLine);
+			
 
 		}
 		
@@ -450,12 +451,10 @@ namespace book2read.Utilities {
 		public void getBookFromFlibusta(int element) {
 			string[] bookDetails = System.IO.File.ReadLines(_toReadFlibusta.FullName).Skip(element).First().Split(";".ToCharArray());
 			//string author = (bookDetails[0] + " " + bookDetails[1] + " " + bookDetails[2]).Trim(" ".ToCharArray());
-			string id = bookDetails[bookDetails.Length - 1];
-			
-			var sb = new StringBuilder();
-			sb.Append(@"http://flibustahezeous3.onion/b/").Append(id).Append(@"/fb2");
+			long id = long.Parse(bookDetails[bookDetails.Length - 1]);
+
 			ProxifiedConnection pc = new ProxifiedConnection();
-			pc.DownloadFile(sb.ToString());
+			pc.DownloadFile(id);
 
 	
 		}

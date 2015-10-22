@@ -8,6 +8,7 @@
  */
 using System;
 using System.Net;
+using System.Text;
 using book2read.Utilities;
 
 namespace book2read.UnitTests {
@@ -24,9 +25,11 @@ namespace book2read.UnitTests {
 			client.Proxy = wp;
 		}
 		
-		public bool DownloadFile(string fileUrl) {
+		public string DownloadFile(long bookId) {
 			string fileName = string.Empty;
-			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fileUrl);
+			var sb = new StringBuilder();
+			sb.Append(@"http://flibustahezeous3.onion/b/").Append(bookId).Append(@"/fb2");
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(sb.ToString());
 			request.Proxy = wp;
 			WebResponse response = request.GetResponse();
 			string contentDisposition = request.Address.AbsoluteUri;
@@ -38,12 +41,11 @@ namespace book2read.UnitTests {
 					fileName = contentDisposition.Substring(index+1);
 			}
 			if (fileName.Length > 0) {
-				client.DownloadFile(fileUrl, FileSystemService.Instance.ToReadPath.FullName + fileName);
-			} else {
-				// Do nothing
+				client.DownloadFile(sb.ToString(), FileSystemService.Instance.ToReadPath.FullName + fileName);
+				return FileSystemService.Instance.ToReadPath.FullName + fileName;
 			}
+			return "";			
 			
-			return true;
 		}
 	}
 }
