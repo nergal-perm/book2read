@@ -14,11 +14,11 @@ namespace book2read.UnitTests
 	[TestFixture]
 	public class ProxifiedConnectionTest
 	{
-		[Ignore]
+		[Test]
 		public void TestMethod()
 		{
 			var target = new ProxifiedConnection();
-			Assert.AreEqual(target.DownloadFile(165506), "hey");
+			Assert.AreEqual(target.DownloadFile(73371), "hey");
 		}
 	}
 }
