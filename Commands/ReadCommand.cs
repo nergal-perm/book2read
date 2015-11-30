@@ -30,6 +30,10 @@ namespace book2read.Commands {
 			// пользователем
 			if (UserInterface.confirmReadOperation(bookInfo)) {
 				DomainLogic.registerReadBook(bookInfo);
+				if (bookInfo.file != null) {
+					string[] command = "get 1".Split(" ".ToCharArray());
+					CommandFactory.getCommand(command).run();
+				}
 			} 
 			
 			return true;
