@@ -112,7 +112,8 @@ namespace book2read.Utilities {
 			string author;
 			int pageCount;
 
-			if (_bookIndex > 0) {
+			// Индекс книги в массиве начинается с нуля
+			if (_bookIndex >= 0) {
 				bookInfo.file = FileSystemService.Instance.getBookFromQueue(_bookIndex);
 				Console.WriteLine("Выбран файл: " + bookInfo.file.Name);
 				Console.Write("Введите название книги: ");

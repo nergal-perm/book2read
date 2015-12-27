@@ -21,16 +21,17 @@ namespace book2read.UnitTests {
 		
 		public ProxifiedConnection() {
 			client = new WebClient();
-			wp = new WebProxy("127.0.0.1", 8118);
-			client.Proxy = wp;
+			//wp = new WebProxy("127.0.0.1", 8118);
+			//client.Proxy = wp;
 		}
 		
 		public string DownloadFile(long bookId) {
 			string fileName = string.Empty;
 			var sb = new StringBuilder();
-			sb.Append(@"http://flibustahezeous3.onion/b/").Append(bookId).Append(@"/fb2");
+			//sb.Append(@"http://flibustahezeous3.onion/b/").Append(bookId).Append(@"/fb2");
+			sb.Append(@"http://flibusta.me/b/").Append(bookId).Append(@"/fb2");
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(sb.ToString());
-			request.Proxy = wp;
+			//request.Proxy = wp;
 			WebResponse response = request.GetResponse();
 			string contentDisposition = request.Address.AbsoluteUri;
 			string contentType = response.ContentType;
