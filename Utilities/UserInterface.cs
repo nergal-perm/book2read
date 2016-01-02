@@ -243,6 +243,7 @@ namespace book2read.Utilities {
 				.Append(string.Format("{0:MMMMM}",stats[0].startDate).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:MMMMM}",stats[1].startDate).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:yyyy}",stats[2].startDate).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:yyyy}",stats[3].startDate).PadLeft(TAB_WIDTH," "[0]))
 				.Append("Всего".PadLeft(TAB_WIDTH," "[0]));	
 			return sb.ToString();
 		}
@@ -251,7 +252,8 @@ namespace book2read.Utilities {
 			sb.Append(string.Format("{0:##0}:{1:00}", Math.Floor(stats[0].timeReading.TotalSeconds / 3600), stats[0].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##0}:{1:00}", Math.Floor(stats[1].timeReading.TotalSeconds / 3600), stats[1].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##0}:{1:00}", Math.Floor(stats[2].timeReading.TotalSeconds / 3600), stats[2].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##0}:{1:00}", Math.Floor(stats[3].timeReading.TotalSeconds / 3600), stats[3].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]));
+				.Append(string.Format("{0:##0}:{1:00}", Math.Floor(stats[3].timeReading.TotalSeconds / 3600), stats[3].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##0}:{1:00}", Math.Floor(stats[4].timeReading.TotalSeconds / 3600), stats[4].timeReading.Minutes).PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();
 		}
 		private static string getBookCountLine(Stats[] stats) {
@@ -259,7 +261,8 @@ namespace book2read.Utilities {
 			sb.Append(stats[0].bookCount.ToString().PadLeft(TAB_WIDTH," "[0]))
 				.Append(stats[1].bookCount.ToString().PadLeft(TAB_WIDTH," "[0]))
 				.Append(stats[2].bookCount.ToString().PadLeft(TAB_WIDTH," "[0]))
-				.Append(stats[3].bookCount.ToString().PadLeft(TAB_WIDTH," "[0]));			
+				.Append(stats[3].bookCount.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[4].bookCount.ToString().PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();			
 		}
 		private static string getAudioBookCountLine(Stats[] stats) {
@@ -267,7 +270,8 @@ namespace book2read.Utilities {
 			sb.Append(stats[0].audioBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
 				.Append(stats[1].audioBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
 				.Append(stats[2].audioBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
-				.Append(stats[3].audioBooks.ToString().PadLeft(TAB_WIDTH," "[0]));			
+				.Append(stats[3].audioBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[4].audioBooks.ToString().PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();						
 		}
 		private static string getNewBooksLine(Stats[] stats) {
@@ -275,7 +279,8 @@ namespace book2read.Utilities {
 			sb.Append(stats[0].newBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
 				.Append(stats[1].newBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
 				.Append(stats[2].newBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
-				.Append(stats[3].newBooks.ToString().PadLeft(TAB_WIDTH," "[0]));			
+				.Append(stats[3].newBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[4].newBooks.ToString().PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();			
 		}
 		private static string getLikedBooksLine(Stats[] stats) {
@@ -283,7 +288,8 @@ namespace book2read.Utilities {
 			sb.Append(stats[0].likedBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
 				.Append(stats[1].likedBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
 				.Append(stats[2].likedBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
-				.Append(stats[3].likedBooks.ToString().PadLeft(TAB_WIDTH," "[0]));			
+				.Append(stats[3].likedBooks.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[4].likedBooks.ToString().PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();				
 		}
 		private static string getAverageRatingLine(Stats[] stats) {
@@ -291,7 +297,8 @@ namespace book2read.Utilities {
 			sb.Append(string.Format("{0:##.00}",(double)stats[0].cumulativeRating / (stats[0].bookCount + stats[0].audioBooks)).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.00}",(double)stats[1].cumulativeRating / (stats[1].bookCount + stats[1].audioBooks)).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.00}",(double)stats[2].cumulativeRating / (stats[2].bookCount + stats[2].audioBooks)).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.00}",(double)stats[3].cumulativeRating / (stats[3].bookCount + + stats[3].audioBooks)).PadLeft(TAB_WIDTH," "[0]));
+				.Append(string.Format("{0:##.00}",(double)stats[3].cumulativeRating / (stats[3].bookCount + stats[3].audioBooks)).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[4].cumulativeRating / (stats[4].bookCount + stats[4].audioBooks)).PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();			
 		}
 		private static string getAverageVolumeLine(Stats[] stats) {
@@ -299,7 +306,8 @@ namespace book2read.Utilities {
 			sb.Append(string.Format("{0:##.00}",(double)stats[0].pagesCount / stats[0].bookCount).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.00}",(double)stats[1].pagesCount / stats[1].bookCount).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.00}",(double)stats[2].pagesCount / stats[2].bookCount).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.00}",(double)stats[3].pagesCount / stats[3].bookCount).PadLeft(TAB_WIDTH," "[0]));
+				.Append(string.Format("{0:##.00}",(double)stats[3].pagesCount / stats[3].bookCount).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[4].pagesCount / stats[4].bookCount).PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();				
 		}
 		private static string getTotalPagesLine(Stats[] stats) { 
@@ -307,7 +315,8 @@ namespace book2read.Utilities {
 			sb.Append(stats[0].pagesCount.ToString().PadLeft(TAB_WIDTH," "[0]))
 				.Append(stats[1].pagesCount.ToString().PadLeft(TAB_WIDTH," "[0]))
 				.Append(stats[2].pagesCount.ToString().PadLeft(TAB_WIDTH," "[0]))
-				.Append(stats[3].pagesCount.ToString().PadLeft(TAB_WIDTH," "[0]));			
+				.Append(stats[3].pagesCount.ToString().PadLeft(TAB_WIDTH," "[0]))
+				.Append(stats[4].pagesCount.ToString().PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();						
 		}
 		private static string getBooksPerMonthLine(Stats[] stats) { 
@@ -315,7 +324,8 @@ namespace book2read.Utilities {
 			sb.Append(string.Format("{0:##.00}",(double)stats[0].bookCount / stats[0].months).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.00}",(double)stats[1].bookCount / stats[1].months).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.00}",(double)stats[2].bookCount / stats[2].months).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.00}",(double)stats[3].bookCount / stats[3].months).PadLeft(TAB_WIDTH," "[0]));
+				.Append(string.Format("{0:##.00}",(double)stats[3].bookCount / stats[3].months).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[4].bookCount / stats[4].months).PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();
 		}
 		private static string getPagesPerMonthLine(Stats[] stats) { 
@@ -323,7 +333,8 @@ namespace book2read.Utilities {
 			sb.Append(string.Format("{0:##.00}",(double)stats[0].pagesCount / stats[0].months).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.00}",(double)stats[1].pagesCount / stats[1].months).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.00}",(double)stats[2].pagesCount / stats[2].months).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.00}",(double)stats[3].pagesCount / stats[3].months).PadLeft(TAB_WIDTH," "[0]));
+				.Append(string.Format("{0:##.00}",(double)stats[3].pagesCount / stats[3].months).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[4].pagesCount / stats[4].months).PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();			
 		}
 		private static string getPagesPerHourLine(Stats[] stats) {
@@ -331,7 +342,8 @@ namespace book2read.Utilities {
 			sb.Append(string.Format("{0:##.00}",(double)stats[0].pagesCount / stats[0].timeReading.TotalSeconds * 3600).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.00}",(double)stats[1].pagesCount / stats[1].timeReading.TotalSeconds * 3600).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.00}",(double)stats[2].pagesCount / stats[2].timeReading.TotalSeconds * 3600).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.00}",(double)stats[3].pagesCount / stats[3].timeReading.TotalSeconds * 3600).PadLeft(TAB_WIDTH," "[0]));
+				.Append(string.Format("{0:##.00}",(double)stats[3].pagesCount / stats[3].timeReading.TotalSeconds * 3600).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.00}",(double)stats[4].pagesCount / stats[4].timeReading.TotalSeconds * 3600).PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();	
 		}
 		private static string getMinutesPerBookLine(Stats[] stats) { 
@@ -339,7 +351,8 @@ namespace book2read.Utilities {
 			sb.Append(string.Format("{0:##.0} ч",(double)stats[0].timeReading.TotalHours / stats[0].bookCount).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.0} ч",(double)stats[1].timeReading.TotalHours / stats[1].bookCount).PadLeft(TAB_WIDTH," "[0]))
 				.Append(string.Format("{0:##.0} ч",(double)stats[2].timeReading.TotalHours / stats[2].bookCount).PadLeft(TAB_WIDTH," "[0]))
-				.Append(string.Format("{0:##.0} ч",(double)stats[3].timeReading.TotalHours / stats[3].bookCount).PadLeft(TAB_WIDTH," "[0]));
+				.Append(string.Format("{0:##.0} ч",(double)stats[3].timeReading.TotalHours / stats[3].bookCount).PadLeft(TAB_WIDTH," "[0]))
+				.Append(string.Format("{0:##.0} ч",(double)stats[4].timeReading.TotalHours / stats[4].bookCount).PadLeft(TAB_WIDTH," "[0]));
 			return sb.ToString();	
 		}
 		
