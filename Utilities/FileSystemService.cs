@@ -136,8 +136,8 @@ namespace book2read.Utilities {
             {
                 appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 dbPath = Path.Combine(appDataPath, "Dropbox\\host.db");
-                if (!System.IO.File.Exists(dbPath))
-                    return null;
+				if (!System.IO.File.Exists(dbPath))
+					return new DirectoryInfo(ConfigurationManager.AppSettings.Get("DropboxFolder"));
             }
 
 			var lines = System.IO.File.ReadAllLines(dbPath);
